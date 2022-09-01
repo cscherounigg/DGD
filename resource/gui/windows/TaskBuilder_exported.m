@@ -81,6 +81,9 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         GridSizexUnitDropDown           matlab.ui.control.DropDown
         GridSizezUnitDropDown           matlab.ui.control.DropDown
         RockTab                         matlab.ui.container.Tab
+        TotalPVEditField                matlab.ui.control.EditField
+        PoreVolumeEditFieldLabel        matlab.ui.control.Label
+        TotalPVUnitLabel                matlab.ui.control.Label
         TabGroup4                       matlab.ui.container.TabGroup
         PorosityTab                     matlab.ui.container.Tab
         GlobalPorosityTabGroup          matlab.ui.container.TabGroup
@@ -1320,8 +1323,9 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         
         % Model panel
         function updateModelPanel(app)
-            % Number of elements
+            % Number of cells
             app.TotelCellsEditField.Value = app.task.getNumberOfCells();
+
             % Layer enabled
             if app.task.params.grid.layer.enable
                 app.turnLampOnOK(app.LayerEnabledLamp);
@@ -1365,6 +1369,15 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
                 app.turnLampOnWarning(app.OverwritingTaskWarningLamp)
             else
                 app.turnLampOff(app.OverwritingTaskWarningLamp)
+            end
+        end
+
+        % Total PV
+        function updateTotalPVField(app)
+            if app.PreviewCheckBox.Value && ~isempty(app.task.model.grid) && ~isempty(app.task.model.rock)
+                app.TotalPVEditField.Value = num2str(app.task.model.grid.getTotalPoreVolume(app.task.model.rock), '%.3e');
+            else
+                app.TotalPVEditField.Value = "NaN";
             end
         end
 
@@ -2093,6 +2106,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             
             waitDialog.Message = "Done.";
             close(waitDialog);
+
+            app.updateTotalPVField(); % Update total PV field
         end
 
         function updateWells(app)
@@ -2146,6 +2161,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             waitDialog = uiprogressdlg(app.GraphicalTaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
             app.task = app.task.buildGrid();
             waitDialog.Value = 1/totalSteps;
+
 
             % Build BCs
             waitDialog.Message = "Building BCs...";
@@ -2304,6 +2320,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         % Value changed function: PreviewCheckBox
         function PreviewCheckBoxValueChanged(app, event)
             app.updateModelPreviewAxes();
+            app.updateTotalPVField();
         end
 
         % Value changed function: GridLayerPlanePointxEditField
@@ -4549,6 +4566,26 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.SingleCalculationCheckBox_8.Text = 'Single Calculation';
             app.SingleCalculationCheckBox_8.Position = [289 29 118 22];
 
+            % Create TotalPVUnitLabel
+            app.TotalPVUnitLabel = uilabel(app.RockTab);
+            app.TotalPVUnitLabel.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.TotalPVUnitLabel.HorizontalAlignment = 'right';
+            app.TotalPVUnitLabel.Position = [956 97 17 22];
+            app.TotalPVUnitLabel.Text = 'm³';
+
+            % Create PoreVolumeEditFieldLabel
+            app.PoreVolumeEditFieldLabel = uilabel(app.RockTab);
+            app.PoreVolumeEditFieldLabel.HorizontalAlignment = 'right';
+            app.PoreVolumeEditFieldLabel.Position = [797 97 74 22];
+            app.PoreVolumeEditFieldLabel.Text = 'Pore Volume';
+
+            % Create TotalPVEditField
+            app.TotalPVEditField = uieditfield(app.RockTab, 'text');
+            app.TotalPVEditField.Editable = 'off';
+            app.TotalPVEditField.HorizontalAlignment = 'right';
+            app.TotalPVEditField.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.TotalPVEditField.Position = [880 97 71 22];
+
             % Create FluidTab
             app.FluidTab = uitab(app.GlobalTabGroup);
             app.FluidTab.AutoResizeChildren = 'off';
@@ -5801,74 +5838,74 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ModelPanel = uipanel(app.Panel_2);
             app.ModelPanel.AutoResizeChildren = 'off';
             app.ModelPanel.Title = 'Model';
-            app.ModelPanel.Position = [576 68 200 207];
+            app.ModelPanel.Position = [576 83 200 192];
 
             % Create TotalcellsLabel
             app.TotalcellsLabel = uilabel(app.ModelPanel);
             app.TotalcellsLabel.BackgroundColor = [0.9412 0.9412 0.9412];
             app.TotalcellsLabel.HorizontalAlignment = 'right';
-            app.TotalcellsLabel.Position = [25 146 58 22];
+            app.TotalcellsLabel.Position = [25 131 58 22];
             app.TotalcellsLabel.Text = 'Total cells';
 
             % Create TotelCellsEditField
             app.TotelCellsEditField = uieditfield(app.ModelPanel, 'numeric');
             app.TotelCellsEditField.Editable = 'off';
             app.TotelCellsEditField.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.TotelCellsEditField.Position = [92 146 71 22];
+            app.TotelCellsEditField.Position = [92 131 71 22];
 
             % Create GridsizewarningLabel_4
             app.GridsizewarningLabel_4 = uilabel(app.ModelPanel);
             app.GridsizewarningLabel_4.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_4.Position = [61 102 82 22];
+            app.GridsizewarningLabel_4.Position = [61 92 82 22];
             app.GridsizewarningLabel_4.Text = 'Layer enabled';
 
             % Create LayerEnabledLamp
             app.LayerEnabledLamp = uilamp(app.ModelPanel);
-            app.LayerEnabledLamp.Position = [152 106 12 12];
+            app.LayerEnabledLamp.Position = [152 96 12 12];
             app.LayerEnabledLamp.Color = [0.8 0.8 0.8];
 
             % Create GridsizewarningLabel_5
             app.GridsizewarningLabel_5 = uilabel(app.ModelPanel);
             app.GridsizewarningLabel_5.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_5.Position = [73 39 70 22];
+            app.GridsizewarningLabel_5.Position = [73 29 70 22];
             app.GridsizewarningLabel_5.Text = 'Default BCs';
 
             % Create BCsEnabledLamp
             app.BCsEnabledLamp = uilamp(app.ModelPanel);
-            app.BCsEnabledLamp.Position = [152 43 12 12];
+            app.BCsEnabledLamp.Position = [152 33 12 12];
             app.BCsEnabledLamp.Color = [0.8 0.8 0.8];
 
             % Create GridsizewarningLabel_6
             app.GridsizewarningLabel_6 = uilabel(app.ModelPanel);
             app.GridsizewarningLabel_6.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_6.Position = [99 81 44 22];
+            app.GridsizewarningLabel_6.Position = [99 71 44 22];
             app.GridsizewarningLabel_6.Text = 'Gravity';
 
             % Create GravityEnabledLamp
             app.GravityEnabledLamp = uilamp(app.ModelPanel);
-            app.GravityEnabledLamp.Position = [152 85 12 12];
+            app.GravityEnabledLamp.Position = [152 75 12 12];
             app.GravityEnabledLamp.Color = [0.8 0.8 0.8];
 
             % Create GridsizewarningLabel_7
             app.GridsizewarningLabel_7 = uilabel(app.ModelPanel);
             app.GridsizewarningLabel_7.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_7.Position = [112 60 31 22];
+            app.GridsizewarningLabel_7.Position = [112 50 31 22];
             app.GridsizewarningLabel_7.Text = 'EOS';
 
             % Create EOSEnabledLamp
             app.EOSEnabledLamp = uilamp(app.ModelPanel);
-            app.EOSEnabledLamp.Position = [152 64 12 12];
+            app.EOSEnabledLamp.Position = [152 54 12 12];
             app.EOSEnabledLamp.Color = [0.8 0.8 0.8];
 
             % Create GridsizewarningLabel_8
             app.GridsizewarningLabel_8 = uilabel(app.ModelPanel);
             app.GridsizewarningLabel_8.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_8.Position = [47 18 96 22];
+            app.GridsizewarningLabel_8.Position = [47 8 96 22];
             app.GridsizewarningLabel_8.Text = 'Initial Equilibrium';
 
             % Create InitialEquilibriumEnabledLamp
             app.InitialEquilibriumEnabledLamp = uilamp(app.ModelPanel);
-            app.InitialEquilibriumEnabledLamp.Position = [152 22 12 12];
+            app.InitialEquilibriumEnabledLamp.Position = [152 12 12 12];
             app.InitialEquilibriumEnabledLamp.Color = [0.8 0.8 0.8];
 
             % Create WarningsPanel

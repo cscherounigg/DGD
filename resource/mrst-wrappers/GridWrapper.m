@@ -240,7 +240,18 @@ classdef GridWrapper
         end
 
         function number = getTotalNumberOfCells(grid)
+            arguments
+                grid GridWrapper
+            end
             number = grid.G.cells.num;
+        end
+
+        function pv = getTotalPoreVolume(grid, rock)
+            arguments
+                grid GridWrapper
+                rock RockWrapper
+            end
+            pv = sum(poreVolume(grid.G, rock.rock));
         end
 
         function cells = getCellsIntersectingPlane(grid, plane)

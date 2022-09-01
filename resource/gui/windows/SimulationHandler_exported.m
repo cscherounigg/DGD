@@ -181,7 +181,7 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
             app.LoggingUITable.Data = tableData;
             app.LoggingUITable.scroll("bottom");
             app.updateLogTableStyle();
-            %pause(.1);
+            pause(.1);
         end
 
         function updateLogTableStyle(app)
