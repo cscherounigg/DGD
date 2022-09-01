@@ -3,9 +3,10 @@ classdef InfoDialog_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         DeepGeoDoubletUIFigure  matlab.ui.Figure
+        HomepageLabel           matlab.ui.control.Label
         MATLABrc19842022TheMathWorksIncLabel  matlab.ui.control.Label
-        CopyrightC2022ChristophScherouniggLabel  matlab.ui.control.Label
-        Version100Label         matlab.ui.control.Label
+        CopyrightLabel          matlab.ui.control.Label
+        VersionLabel            matlab.ui.control.Label
         CloseButton             matlab.ui.control.Button
         TextArea                matlab.ui.control.TextArea
         DeepGeoDoubletLabel     matlab.ui.control.Label
@@ -16,6 +17,15 @@ classdef InfoDialog_exported < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app, text)
+            % Version and copyright notice
+            globalConsts = getGlobalConsts();
+            app.VersionLabel.Text = sprintf("Version %s", globalConsts.VERSION);
+            app.CopyrightLabel.Text = sprintf("Copyright (C) %s %s %s", ...
+                globalConsts.YEAR, ...
+                globalConsts.AUTHOR_FIRSTNAME, ...
+                upper(globalConsts.AUTHOR_LASTNAME));
+
+            % License area
             app.TextArea.Value = text;
         end
 
@@ -41,14 +51,15 @@ classdef InfoDialog_exported < matlab.apps.AppBase
             app.DeepGeoDoubletLabel.HorizontalAlignment = 'center';
             app.DeepGeoDoubletLabel.FontSize = 22;
             app.DeepGeoDoubletLabel.FontWeight = 'bold';
-            app.DeepGeoDoubletLabel.Position = [196 573 184 29];
+            app.DeepGeoDoubletLabel.Position = [36 573 503 29];
             app.DeepGeoDoubletLabel.Text = 'DeepGeoDoublet';
 
             % Create TextArea
             app.TextArea = uitextarea(app.DeepGeoDoubletUIFigure);
             app.TextArea.Editable = 'off';
             app.TextArea.HorizontalAlignment = 'center';
-            app.TextArea.Position = [36 68 503 432];
+            app.TextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.TextArea.Position = [36 68 503 421];
 
             % Create CloseButton
             app.CloseButton = uibutton(app.DeepGeoDoubletUIFigure, 'push');
@@ -56,23 +67,30 @@ classdef InfoDialog_exported < matlab.apps.AppBase
             app.CloseButton.Position = [439 28 100 22];
             app.CloseButton.Text = 'Close';
 
-            % Create Version100Label
-            app.Version100Label = uilabel(app.DeepGeoDoubletUIFigure);
-            app.Version100Label.HorizontalAlignment = 'center';
-            app.Version100Label.Position = [250 542 76 22];
-            app.Version100Label.Text = 'Version 1.0.0';
+            % Create VersionLabel
+            app.VersionLabel = uilabel(app.DeepGeoDoubletUIFigure);
+            app.VersionLabel.HorizontalAlignment = 'center';
+            app.VersionLabel.Position = [37 542 502 22];
+            app.VersionLabel.Text = 'Version X.X.X';
 
-            % Create CopyrightC2022ChristophScherouniggLabel
-            app.CopyrightC2022ChristophScherouniggLabel = uilabel(app.DeepGeoDoubletUIFigure);
-            app.CopyrightC2022ChristophScherouniggLabel.HorizontalAlignment = 'center';
-            app.CopyrightC2022ChristophScherouniggLabel.Position = [169 521 238 22];
-            app.CopyrightC2022ChristophScherouniggLabel.Text = 'Copyright (C) 2022  Christoph Scherounigg';
+            % Create CopyrightLabel
+            app.CopyrightLabel = uilabel(app.DeepGeoDoubletUIFigure);
+            app.CopyrightLabel.HorizontalAlignment = 'center';
+            app.CopyrightLabel.Position = [36 521 503 22];
+            app.CopyrightLabel.Text = 'Copyright (C) XXXX Author';
 
             % Create MATLABrc19842022TheMathWorksIncLabel
             app.MATLABrc19842022TheMathWorksIncLabel = uilabel(app.DeepGeoDoubletUIFigure);
             app.MATLABrc19842022TheMathWorksIncLabel.HorizontalAlignment = 'center';
             app.MATLABrc19842022TheMathWorksIncLabel.Position = [37 28 269 22];
             app.MATLABrc19842022TheMathWorksIncLabel.Text = 'MATLAB(r). (c) 1984 - 2022 The MathWorks, Inc.';
+
+            % Create HomepageLabel
+            app.HomepageLabel = uilabel(app.DeepGeoDoubletUIFigure);
+            app.HomepageLabel.Interpreter = 'html';
+            app.HomepageLabel.HorizontalAlignment = 'center';
+            app.HomepageLabel.Position = [36 500 503 22];
+            app.HomepageLabel.Text = '<a href="https://github.com/cscherounigg/DGD/">Homepage (GitHub)</a>';
 
             % Show the figure after all components are created
             app.DeepGeoDoubletUIFigure.Visible = 'on';

@@ -30,6 +30,7 @@ addpath('resource/geometry');
 addpath('resource/global');
 addpath('resource/gui');
 addpath('resource/gui/dialogs');
+addpath('resource/gui/windows');
 addpath('resource/mrst-wrappers');
 addpath('resource/plot');
 addpath('resource/simulation');

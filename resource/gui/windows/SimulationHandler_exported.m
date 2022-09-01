@@ -3,6 +3,7 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         SimulationHandlerUIFigure     matlab.ui.Figure
+        ClearResultsButton            matlab.ui.control.Button
         ResultsPanel                  matlab.ui.container.Panel
         TimestepsTableButton          matlab.ui.control.Button
         ReservoirProfileViewerButton  matlab.ui.control.Button
@@ -48,17 +49,9 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
                     messageDialog(app.SimulationHandlerUIFigure, "Simulation is currently running. Execution can only be aborted via MRST Simulation Panel.", "Simulation Running", DialogType.ERROR)
                     return;
             end
-            if ishandle(app.reservoirAnalyzerFigure)
-                close(app.reservoirAnalyzerFigure);
-            end 
-            if ishandle(app.wellDataPlotFigure)
-                close(app.wellDataPlotFigure);
-            end
-            if ishandle(app.timestepsTableFigure)
-                close(app.timestepsTableFigure);
-            end
+            app.closeSubfigures();
             app.callingApp.showApp();
-            app.delete();
+            app.delete();       
         end
         
         function loadTaskParams(app)
@@ -69,52 +62,58 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
         
         function executeTask(app)
 
-            if storedDataAvailable(app.resultHandler) && app.StoreResultsOnDiskCheckBox.Value
+            if app.task.storedDataAvailable()   
                 if overwriteExistingResultsDialog(app.SimulationHandlerUIFigure) == "No"
                     return;
                 end
             end
 
+            app.closeSubfigures();
+
             app.state = ProcessorState.PREPROCESSING;
             app.updateComponentStates();
             
             app.appendLogMessage('STARTING SIMULATION PROCESS');
-            app.appendLogMessage('This may take a while. Brew yourself some coffee.')
+            app.appendLogMessage('This may take a while. Brew yourself some coffee.');
 
             % PREPROCESSING
             
-            app.appendLogMessage('PREPROCESSING.')
+            app.appendLogMessage('PREPROCESSING.');
+            app.appendLogMessage('Removing old data.');
+            app.task.clearData();
             app.task = app.task.buildModel(@app.appendLogMessage);
-            app.appendLogMessage('PREPROCESSING DONE.')
+            app.appendLogMessage('PREPROCESSING DONE.');
 
             % RUNNING
             app.state = ProcessorState.RUNNING;
             app.updateComponentStates();
-            app.appendLogMessage('MRST SIMULATION.')
+            app.appendLogMessage('MRST SIMULATION.');
             try
                 app.resultHandler = processTask(app.task, @app.appendLogMessage, app.StoreResultsOnDiskCheckBox.Value);
             catch e
                 beep on; beep; % Play alert sound
                 app.state = ProcessorState.ERROR;
-                app.updateComponentStates()
+                app.updateComponentStates();
                 switch e.identifier
                     case 'TaskProcessor:NoSolution'
-                        app.appendLogMessage("Error: No solution found after timestep reduction. Check input and thresholds.") 
+                        app.appendLogMessage("Error: No solution found after timestep reduction. Check input and thresholds.");
                     case 'TaskProcessor:NoInitialEquilibriumSolution'
-                        app.appendLogMessage("Error: No solution found after timestep reduction. Check input and thresholds.")
+                        app.appendLogMessage("Error: No solution found after timestep reduction. Check input and thresholds.");
+                    case 'TaskProcessor:InvalidPoreVolume'
+                        app.appendLogMessage("Error: Pore volume zero or negative. Calculations with zero pore volume are currently not supported.");
                     otherwise
-                        app.appendLogMessage("Error: Unknown error. See global runtime log and report issue.")
-                        beep off
-                        rethrow(e)
+                        app.appendLogMessage("Error: Unknown error. See global runtime log and report issue.");
+                        beep off;
+                        rethrow(e);
                 end
                 return
             end
-            app.appendLogMessage('MRST SIMULATION DONE.')
+            app.appendLogMessage('MRST SIMULATION DONE.');
 
             % DONE
             app.state = ProcessorState.DONE;
             app.updateComponentStates();
-            app.appendLogMessage('TASK COMPLETED.')
+            app.appendLogMessage('TASK COMPLETED.');
             
         end
 
@@ -153,23 +152,25 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
         end
 
         function updateResultComponents(app)
-            if storedDataAvailable(app.resultHandler)
+            if app.task.storedDataAvailable() || ~isempty(app.resultHandler.data)
                 app.MRSTReservoirAnalyzerButton.Enable = "on";
                 app.MRSTWellDataPlotButton.Enable = "on";
                 app.TimestepsTableButton.Enable = "on";
-                app.turnLampOnOK(app.ResultsAvailableOnDiskLamp);                
+                app.turnLampOnOK(app.ResultsAvailableOnDiskLamp);    
+                app.ClearResultsButton.Enable = "on";
             else
                 app.MRSTReservoirAnalyzerButton.Enable = "off";
                 app.MRSTWellDataPlotButton.Enable = "off";
                 app.TimestepsTableButton.Enable = "off";
                 app.turnLampOff(app.ResultsAvailableOnDiskLamp);
+                app.ClearResultsButton.Enable = "off";
             end
         end
 
         function disableResultComponents(app)
             app.MRSTReservoirAnalyzerButton.Enable = "off";
             app.MRSTWellDataPlotButton.Enable = "off";
-            app.ReservoirProfileViewerButton.Enable = "off";
+            app.TimestepsTableButton.Enable = "off";
         end
 
         function appendLogMessage(app, message)
@@ -180,7 +181,7 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
             app.LoggingUITable.Data = tableData;
             app.LoggingUITable.scroll("bottom");
             app.updateLogTableStyle();
-            pause(.5);
+            %pause(.1);
         end
 
         function updateLogTableStyle(app)
@@ -213,6 +214,18 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
                 app.appendLogMessage("Done.")
                 app.state = ProcessorState.DONE;
                 app.updateComponentStates();
+            end
+        end
+
+        function closeSubfigures(app)
+            if ishandle(app.reservoirAnalyzerFigure)
+                close(app.reservoirAnalyzerFigure);
+            end 
+            if ishandle(app.wellDataPlotFigure)
+                close(app.wellDataPlotFigure);
+            end
+            if ishandle(app.timestepsTableFigure)
+                close(app.timestepsTableFigure);
             end
         end
     end
@@ -276,19 +289,50 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
 
         % Button pushed function: MRSTReservoirAnalyzerButton
         function MRSTReservoirAnalyzerButtonPushed(app, event)
+            if ishandle(app.reservoirAnalyzerFigure)
+                % Figure already opened
+                return;
+            end
             app.prepareTaskModelForResults();
-            app.reservoirAnalyzerFigure = plotAnimatedReservoir(app.task.model.grid, app.resultHandler, app.task.model.wells);
+            app.reservoirAnalyzerFigure = plotAnimatedReservoir(app.task, app.resultHandler);
         end
 
         % Button pushed function: MRSTWellDataPlotButton
         function MRSTWellDataPlotButtonPushed(app, event)
+            if ishandle(app.wellDataPlotFigure)
+                % Figure already opened
+                return;
+            end
             app.prepareTaskModelForResults();
-            app.wellDataPlotFigure = plotWellSolutionData(app.resultHandler, app.task.params.simulation.equilibriumTime);
+            if app.task.params.simulation.initializeWithEquilibrium
+                offset = app.task.params.simulation.equilibriumTime;
+            else
+                offset = 0;
+            end
+            app.wellDataPlotFigure = plotWellSolutionData(app.resultHandler, offset);
         end
 
         % Button pushed function: TimestepsTableButton
         function TimestepsTableButtonPushed(app, event)
-            app.timestepsTableFigure = getTimestepsTable(app.resultHandler, app.task.params.simulation.equilibriumTime);
+            if ishandle(app.timestepsTableFigure)
+                % Figure already opened
+                return;
+            end
+            if app.task.params.simulation.initializeWithEquilibrium
+                offset = app.task.params.simulation.equilibriumTime;
+            else
+                offset = 0;
+            end
+            app.timestepsTableFigure = getTimestepsTable(app.resultHandler, offset);
+        end
+
+        % Button pushed function: ClearResultsButton
+        function ClearResultsButtonPushed(app, event)
+            if clearResultsDialog(app.SimulationHandlerUIFigure) == "Yes"
+                app.task.clearData();
+                app.resultHandler = app.task.getResultHandler();
+                app.updateResultComponents();
+            end
         end
     end
 
@@ -335,8 +379,8 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
             app.GridsizewarningLabel = uilabel(app.SimulationLogPanel);
             app.GridsizewarningLabel.HorizontalAlignment = 'right';
             app.GridsizewarningLabel.FontWeight = 'bold';
-            app.GridsizewarningLabel.Position = [486 20 148 22];
-            app.GridsizewarningLabel.Text = 'Results available on disk';
+            app.GridsizewarningLabel.Position = [531 20 103 22];
+            app.GridsizewarningLabel.Text = 'Results available';
 
             % Create ResultsAvailableOnDiskLamp
             app.ResultsAvailableOnDiskLamp = uilamp(app.SimulationLogPanel);
@@ -347,7 +391,7 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
             app.StoreResultsOnDiskCheckBox = uicheckbox(app.SimulationLogPanel);
             app.StoreResultsOnDiskCheckBox.Tooltip = {'Stores the result of each timestep on disk. Useful to keep results of extensive simulations even if errors occur or the simulator crashes. When unchecked, existing results are not overwritten.'};
             app.StoreResultsOnDiskCheckBox.Text = 'Store results on disk';
-            app.StoreResultsOnDiskCheckBox.Position = [339 20 131 22];
+            app.StoreResultsOnDiskCheckBox.Position = [387 20 131 22];
             app.StoreResultsOnDiskCheckBox.Value = true;
 
             % Create TaskMetadataPanel
@@ -407,7 +451,7 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
             % Create RunButton
             app.RunButton = uibutton(app.SimulationHandlerUIFigure, 'push');
             app.RunButton.ButtonPushedFcn = createCallbackFcn(app, @RunButtonPushed, true);
-            app.RunButton.Position = [710 25 100 22];
+            app.RunButton.Position = [603 25 100 22];
             app.RunButton.Text = 'Run';
 
             % Create InfoLabel
@@ -445,6 +489,12 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
             app.TimestepsTableButton.ButtonPushedFcn = createCallbackFcn(app, @TimestepsTableButtonPushed, true);
             app.TimestepsTableButton.Position = [33 56 153 22];
             app.TimestepsTableButton.Text = 'Timesteps Table';
+
+            % Create ClearResultsButton
+            app.ClearResultsButton = uibutton(app.SimulationHandlerUIFigure, 'push');
+            app.ClearResultsButton.ButtonPushedFcn = createCallbackFcn(app, @ClearResultsButtonPushed, true);
+            app.ClearResultsButton.Position = [712 25 100 22];
+            app.ClearResultsButton.Text = 'Clear Results';
 
             % Show the figure after all components are created
             app.SimulationHandlerUIFigure.Visible = 'on';

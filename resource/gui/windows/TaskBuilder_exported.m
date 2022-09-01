@@ -2,16 +2,20 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        TaskBuilderUIFigure             matlab.ui.Figure
+        GraphicalTaskBuilderUIFigure    matlab.ui.Figure
         Panel_2                         matlab.ui.container.Panel
         WarningsPanel                   matlab.ui.container.Panel
-        TimeStepsWarningLamp            matlab.ui.control.Lamp
-        GridsizewarningLabel_3          matlab.ui.control.Label
         OverwritingTaskWarningLamp      matlab.ui.control.Lamp
         GridsizewarningLabel_2          matlab.ui.control.Label
         GridSizeWarningLamp             matlab.ui.control.Lamp
         GridsizewarningLabel            matlab.ui.control.Label
         ModelPanel                      matlab.ui.container.Panel
+        InitialEquilibriumEnabledLamp   matlab.ui.control.Lamp
+        GridsizewarningLabel_8          matlab.ui.control.Label
+        EOSEnabledLamp                  matlab.ui.control.Lamp
+        GridsizewarningLabel_7          matlab.ui.control.Label
+        GravityEnabledLamp              matlab.ui.control.Lamp
+        GridsizewarningLabel_6          matlab.ui.control.Label
         BCsEnabledLamp                  matlab.ui.control.Lamp
         GridsizewarningLabel_5          matlab.ui.control.Label
         LayerEnabledLamp                matlab.ui.control.Lamp
@@ -26,7 +30,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         QuitButton                      matlab.ui.control.Button
         SaveandExitButton               matlab.ui.control.Button
         GlobalTabGroup                  matlab.ui.container.TabGroup
-        TaskTab                         matlab.ui.container.Tab
+        GenericTab                      matlab.ui.container.Tab
         TaskKeepExistingCheckBox        matlab.ui.control.CheckBox
         TaskNotesTextArea               matlab.ui.control.TextArea
         NotesTextAreaLabel              matlab.ui.control.Label
@@ -409,6 +413,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         ReservoirInitPressureUnitDropDown  matlab.ui.control.DropDown
         WellsTab                        matlab.ui.container.Tab
         WellsProducerPanel              matlab.ui.container.Panel
+        ControlTypeLabel_2              matlab.ui.control.Label
         ProdWellPointyEditField         matlab.ui.control.NumericEditField
         xLabel_23                       matlab.ui.control.Label
         ProdWellPointzEditField         matlab.ui.control.NumericEditField
@@ -429,6 +434,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         ProdWellConstantRateButton      matlab.ui.control.RadioButton
         ProdWellRadiusUnitDropDown      matlab.ui.control.DropDown
         WellsInjectorPanel              matlab.ui.container.Panel
+        ControlTypeLabel                matlab.ui.control.Label
         InjWellTempEditField            matlab.ui.control.NumericEditField
         FluidTemperatureLabel           matlab.ui.control.Label
         InjWellTempUnitDropDown         matlab.ui.control.DropDown
@@ -496,7 +502,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         % Methods needed for app control.       
 
         function closeAppPrompt(app)
-            decision = quitWithoutSavingDialog(app.TaskBuilderUIFigure);
+            decision = quitWithoutSavingDialog(app.GraphicalTaskBuilderUIFigure);
             switch decision
                 case 'Save'
                     app.saveTask();
@@ -1314,16 +1320,37 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         
         % Model panel
         function updateModelPanel(app)
+            % Number of elements
             app.TotelCellsEditField.Value = app.task.getNumberOfCells();
+            % Layer enabled
             if app.task.params.grid.layer.enable
-                app.turnLampOnOK(app.LayerEnabledLamp)
+                app.turnLampOnOK(app.LayerEnabledLamp);
             else
-                app.turnLampOff(app.LayerEnabledLamp)
+                app.turnLampOff(app.LayerEnabledLamp);
             end
-            if any(app.task.params.bc.enable)
-                app.turnLampOnOK(app.BCsEnabledLamp);
+            % Gravity
+            if app.task.params.fluid.gravity.enabled
+                app.turnLampOnOK(app.GravityEnabledLamp);
             else
+                app.turnLampOff(app.GravityEnabledLamp);
+            end
+            % EOS
+            if app.task.params.fluid.useEOS
+                app.turnLampOnOK(app.EOSEnabledLamp);
+            else
+                app.turnLampOff(app.EOSEnabledLamp);
+            end
+            % BCs
+            if any(app.task.params.bc.enable)
                 app.turnLampOff(app.BCsEnabledLamp);
+            else
+                app.turnLampOnOK(app.BCsEnabledLamp);
+            end
+            % Initial equilibrium
+            if app.task.params.simulation.initializeWithEquilibrium
+                app.turnLampOnOK(app.InitialEquilibriumEnabledLamp);
+            else
+                app.turnLampOff(app.InitialEquilibriumEnabledLamp);
             end
         end
 
@@ -1334,7 +1361,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             else
                 app.turnLampOff(app.GridSizeWarningLamp)
             end
-            if strcmp(app.oldTaskName, app.TaskNameEditField.Value)
+            if strcmp(app.oldTaskName, app.TaskNameEditField.Value) && ~app.TaskKeepExistingCheckBox.Value
                 app.turnLampOnWarning(app.OverwritingTaskWarningLamp)
             else
                 app.turnLampOff(app.OverwritingTaskWarningLamp)
@@ -2017,7 +2044,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             totalSteps = 3;
 
             % Build grid
-            waitDialog = uiprogressdlg(app.TaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
+            waitDialog = uiprogressdlg(app.GraphicalTaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
             app.task = app.task.buildGrid();
             waitDialog.Value = 1/totalSteps;
             
@@ -2045,7 +2072,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             totalSteps = 4;
 
             % Build grid
-            waitDialog = uiprogressdlg(app.TaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
+            waitDialog = uiprogressdlg(app.GraphicalTaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
             app.task = app.task.buildGrid();
             waitDialog.Value = 1/totalSteps;
 
@@ -2077,7 +2104,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             totalSteps = 5;
 
             % Build grid
-            waitDialog = uiprogressdlg(app.TaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
+            waitDialog = uiprogressdlg(app.GraphicalTaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
             app.task = app.task.buildGrid();
             waitDialog.Value = 1/totalSteps;
             
@@ -2098,7 +2125,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Visualize wells
             waitDialog.Message = "Visualizing wells...";
-            app.task.visualizeWells(app.ModelPreviewAxes, 15);
+            app.task.visualizeWells(app.ModelPreviewAxes);
             waitDialog.Value = 5/totalSteps;
             
             waitDialog.Message = "Done.";
@@ -2116,7 +2143,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             totalSteps = 3;
             
             % Build grid
-            waitDialog = uiprogressdlg(app.TaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
+            waitDialog = uiprogressdlg(app.GraphicalTaskBuilderUIFigure, 'Title', 'Please wait', 'Message', 'Building grid...');
             app.task = app.task.buildGrid();
             waitDialog.Value = 1/totalSteps;
 
@@ -2132,6 +2159,16 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             
             waitDialog.Message = "Done.";
             close(waitDialog);
+        end
+
+        function updateFluid(app)
+            app.updateTaskParams();
+            app.updateModelPanel();
+        end
+
+        function updateReservoir(app)
+            app.updateTaskParams();
+            app.updateModelPanel();
         end
         
     end
@@ -2189,8 +2226,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.closeAppPrompt();
         end
 
-        % Close request function: TaskBuilderUIFigure
-        function TaskBuilderUIFigureCloseRequest(app, event)
+        % Close request function: GraphicalTaskBuilderUIFigure
+        function GraphicalTaskBuilderUIFigureCloseRequest(app, event)
             app.closeAppPrompt();            
         end
 
@@ -2935,6 +2972,22 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         % Value changed function: FluidGravityCheckBox
         function FluidGravityCheckBoxValueChanged(app, event)
             app.updateFluidTabVisibility();
+            app.updateFluid();
+        end
+
+        % Value changed function: FluidEOSCheckBox
+        function FluidEOSCheckBoxValueChanged(app, event)
+            app.updateFluid();     
+        end
+
+        % Value changed function: InitializeWithEquilibriumCheckBox
+        function InitializeWithEquilibriumCheckBoxValueChanged(app, event)
+            app.updateReservoir();
+        end
+
+        % Value changed function: TaskKeepExistingCheckBox
+        function TaskKeepExistingCheckBoxValueChanged(app, event)
+            app.updateWarningsPanel();
         end
     end
 
@@ -2944,61 +2997,62 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         % Create UIFigure and components
         function createComponents(app)
 
-            % Create TaskBuilderUIFigure and hide until all components are created
-            app.TaskBuilderUIFigure = uifigure('Visible', 'off');
-            app.TaskBuilderUIFigure.AutoResizeChildren = 'off';
-            app.TaskBuilderUIFigure.Position = [100 100 1034 772];
-            app.TaskBuilderUIFigure.Name = 'Task Builder';
-            app.TaskBuilderUIFigure.Resize = 'off';
-            app.TaskBuilderUIFigure.CloseRequestFcn = createCallbackFcn(app, @TaskBuilderUIFigureCloseRequest, true);
+            % Create GraphicalTaskBuilderUIFigure and hide until all components are created
+            app.GraphicalTaskBuilderUIFigure = uifigure('Visible', 'off');
+            app.GraphicalTaskBuilderUIFigure.AutoResizeChildren = 'off';
+            app.GraphicalTaskBuilderUIFigure.Position = [100 100 1034 772];
+            app.GraphicalTaskBuilderUIFigure.Name = 'Graphical Task Builder';
+            app.GraphicalTaskBuilderUIFigure.Resize = 'off';
+            app.GraphicalTaskBuilderUIFigure.CloseRequestFcn = createCallbackFcn(app, @GraphicalTaskBuilderUIFigureCloseRequest, true);
 
             % Create GlobalTabGroup
-            app.GlobalTabGroup = uitabgroup(app.TaskBuilderUIFigure);
+            app.GlobalTabGroup = uitabgroup(app.GraphicalTaskBuilderUIFigure);
             app.GlobalTabGroup.AutoResizeChildren = 'off';
             app.GlobalTabGroup.SelectionChangedFcn = createCallbackFcn(app, @GlobalTabGroupSelectionChanged, true);
             app.GlobalTabGroup.Position = [1 379 1034 394];
 
-            % Create TaskTab
-            app.TaskTab = uitab(app.GlobalTabGroup);
-            app.TaskTab.AutoResizeChildren = 'off';
-            app.TaskTab.Title = 'Task';
+            % Create GenericTab
+            app.GenericTab = uitab(app.GlobalTabGroup);
+            app.GenericTab.AutoResizeChildren = 'off';
+            app.GenericTab.Title = 'Generic';
 
             % Create NameEditFieldLabel
-            app.NameEditFieldLabel = uilabel(app.TaskTab);
+            app.NameEditFieldLabel = uilabel(app.GenericTab);
             app.NameEditFieldLabel.HorizontalAlignment = 'right';
             app.NameEditFieldLabel.Position = [47 311 38 22];
             app.NameEditFieldLabel.Text = 'Name';
 
             % Create TaskNameEditField
-            app.TaskNameEditField = uieditfield(app.TaskTab, 'text');
+            app.TaskNameEditField = uieditfield(app.GenericTab, 'text');
             app.TaskNameEditField.ValueChangedFcn = createCallbackFcn(app, @TaskNameEditFieldValueChanged, true);
             app.TaskNameEditField.Position = [100 311 257 22];
             app.TaskNameEditField.Value = 'Task';
 
             % Create CreatedEditFieldLabel
-            app.CreatedEditFieldLabel = uilabel(app.TaskTab);
+            app.CreatedEditFieldLabel = uilabel(app.GenericTab);
             app.CreatedEditFieldLabel.HorizontalAlignment = 'right';
             app.CreatedEditFieldLabel.Position = [37 142 48 22];
             app.CreatedEditFieldLabel.Text = 'Created';
 
             % Create TaskCreatedEditField
-            app.TaskCreatedEditField = uieditfield(app.TaskTab, 'text');
+            app.TaskCreatedEditField = uieditfield(app.GenericTab, 'text');
             app.TaskCreatedEditField.Editable = 'off';
             app.TaskCreatedEditField.BackgroundColor = [0.9412 0.9412 0.9412];
             app.TaskCreatedEditField.Position = [100 142 168 22];
 
             % Create NotesTextAreaLabel
-            app.NotesTextAreaLabel = uilabel(app.TaskTab);
+            app.NotesTextAreaLabel = uilabel(app.GenericTab);
             app.NotesTextAreaLabel.HorizontalAlignment = 'right';
             app.NotesTextAreaLabel.Position = [48 271 37 22];
             app.NotesTextAreaLabel.Text = 'Notes';
 
             % Create TaskNotesTextArea
-            app.TaskNotesTextArea = uitextarea(app.TaskTab);
+            app.TaskNotesTextArea = uitextarea(app.GenericTab);
             app.TaskNotesTextArea.Position = [100 179 257 116];
 
             % Create TaskKeepExistingCheckBox
-            app.TaskKeepExistingCheckBox = uicheckbox(app.TaskTab);
+            app.TaskKeepExistingCheckBox = uicheckbox(app.GenericTab);
+            app.TaskKeepExistingCheckBox.ValueChangedFcn = createCallbackFcn(app, @TaskKeepExistingCheckBoxValueChanged, true);
             app.TaskKeepExistingCheckBox.Text = 'Keep existing Task';
             app.TaskKeepExistingCheckBox.Position = [100 111 122 22];
 
@@ -3259,7 +3313,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GridNzEditField
             app.GridNzEditField = uieditfield(app.GlobalcellsPanel, 'numeric');
-            app.GridNzEditField.Limits = [10 Inf];
+            app.GridNzEditField.Limits = [1 Inf];
             app.GridNzEditField.RoundFractionalValues = 'on';
             app.GridNzEditField.ValueChangedFcn = createCallbackFcn(app, @GridNzEditFieldValueChanged, true);
             app.GridNzEditField.Position = [42 13 49 22];
@@ -4646,43 +4700,44 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             % Create FluidDensityUnitDropDown
             app.FluidDensityUnitDropDown = uidropdown(app.GeneralPropertiesPanel);
             app.FluidDensityUnitDropDown.Items = {'kg/m³', 'g/cm³', 'ppg'};
-            app.FluidDensityUnitDropDown.Position = [199 46 73 22];
+            app.FluidDensityUnitDropDown.Position = [179 46 73 22];
             app.FluidDensityUnitDropDown.Value = 'kg/m³';
 
             % Create FluidViscosityUnitDropDown
             app.FluidViscosityUnitDropDown = uidropdown(app.GeneralPropertiesPanel);
             app.FluidViscosityUnitDropDown.Items = {'cP', 'Pas'};
-            app.FluidViscosityUnitDropDown.Position = [199 14 73 22];
+            app.FluidViscosityUnitDropDown.Position = [179 14 73 22];
             app.FluidViscosityUnitDropDown.Value = 'cP';
 
             % Create DensityEditFieldLabel
             app.DensityEditFieldLabel = uilabel(app.GeneralPropertiesPanel);
             app.DensityEditFieldLabel.HorizontalAlignment = 'right';
-            app.DensityEditFieldLabel.Position = [77 46 46 22];
+            app.DensityEditFieldLabel.Position = [57 46 46 22];
             app.DensityEditFieldLabel.Text = 'Density';
 
             % Create FluidDensityEditField
             app.FluidDensityEditField = uieditfield(app.GeneralPropertiesPanel, 'numeric');
             app.FluidDensityEditField.Limits = [0 Inf];
-            app.FluidDensityEditField.Position = [138 46 53 22];
+            app.FluidDensityEditField.Position = [118 46 53 22];
             app.FluidDensityEditField.Value = 1000;
 
             % Create ViscosityEditFieldLabel
             app.ViscosityEditFieldLabel = uilabel(app.GeneralPropertiesPanel);
             app.ViscosityEditFieldLabel.HorizontalAlignment = 'right';
-            app.ViscosityEditFieldLabel.Position = [70 14 53 22];
+            app.ViscosityEditFieldLabel.Position = [50 14 53 22];
             app.ViscosityEditFieldLabel.Text = 'Viscosity';
 
             % Create FluidViscosityEditField
             app.FluidViscosityEditField = uieditfield(app.GeneralPropertiesPanel, 'numeric');
             app.FluidViscosityEditField.Limits = [0 Inf];
-            app.FluidViscosityEditField.Position = [138 14 53 22];
+            app.FluidViscosityEditField.Position = [118 14 53 22];
             app.FluidViscosityEditField.Value = 1;
 
             % Create FluidEOSCheckBox
             app.FluidEOSCheckBox = uicheckbox(app.GeneralPropertiesPanel);
-            app.FluidEOSCheckBox.Text = 'Use EOS';
-            app.FluidEOSCheckBox.Position = [27 77 72 22];
+            app.FluidEOSCheckBox.ValueChangedFcn = createCallbackFcn(app, @FluidEOSCheckBoxValueChanged, true);
+            app.FluidEOSCheckBox.Text = 'Use EOS (Spivey et al., 2004)';
+            app.FluidEOSCheckBox.Position = [56 77 182 22];
 
             % Create BCsTab
             app.BCsTab = uitab(app.GlobalTabGroup);
@@ -5238,6 +5293,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create InitializeWithEquilibriumCheckBox
             app.InitializeWithEquilibriumCheckBox = uicheckbox(app.InitialConditionsPanel);
+            app.InitializeWithEquilibriumCheckBox.ValueChangedFcn = createCallbackFcn(app, @InitializeWithEquilibriumCheckBoxValueChanged, true);
             app.InitializeWithEquilibriumCheckBox.Text = 'Initialize with undisturbed equilibrium';
             app.InitializeWithEquilibriumCheckBox.Position = [373 59 218 22];
             app.InitializeWithEquilibriumCheckBox.Value = true;
@@ -5272,30 +5328,30 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             % Create WellNameEditFieldLabel
             app.WellNameEditFieldLabel = uilabel(app.WellsInjectorPanel);
             app.WellNameEditFieldLabel.HorizontalAlignment = 'right';
-            app.WellNameEditFieldLabel.Position = [76 254 64 22];
+            app.WellNameEditFieldLabel.Position = [76 263 64 22];
             app.WellNameEditFieldLabel.Text = 'Well Name';
 
             % Create InjWellNameEditField
             app.InjWellNameEditField = uieditfield(app.WellsInjectorPanel, 'text');
             app.InjWellNameEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellNameEditFieldValueChanged, true);
-            app.InjWellNameEditField.Position = [155 254 139 22];
+            app.InjWellNameEditField.Position = [155 263 171 22];
             app.InjWellNameEditField.Value = 'Inj';
 
             % Create RadiusEditFieldLabel
             app.RadiusEditFieldLabel = uilabel(app.WellsInjectorPanel);
             app.RadiusEditFieldLabel.HorizontalAlignment = 'right';
-            app.RadiusEditFieldLabel.Position = [96 218 43 22];
+            app.RadiusEditFieldLabel.Position = [96 226 43 22];
             app.RadiusEditFieldLabel.Text = 'Radius';
 
             % Create InjWellRadiusEditField
             app.InjWellRadiusEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
-            app.InjWellRadiusEditField.Position = [154 218 61 22];
+            app.InjWellRadiusEditField.Position = [155 226 61 22];
             app.InjWellRadiusEditField.Value = 70;
 
             % Create InjWellRadiusUnitDropDown
             app.InjWellRadiusUnitDropDown = uidropdown(app.WellsInjectorPanel);
             app.InjWellRadiusUnitDropDown.Items = {'mm', 'inch'};
-            app.InjWellRadiusUnitDropDown.Position = [226 218 68 22];
+            app.InjWellRadiusUnitDropDown.Position = [226 226 68 22];
             app.InjWellRadiusUnitDropDown.Value = 'mm';
 
             % Create InjWellControlButtonGroup
@@ -5303,53 +5359,53 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.InjWellControlButtonGroup.AutoResizeChildren = 'off';
             app.InjWellControlButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @InjWellControlButtonGroupSelectionChanged, true);
             app.InjWellControlButtonGroup.BorderType = 'none';
-            app.InjWellControlButtonGroup.Position = [101 134 123 70];
+            app.InjWellControlButtonGroup.Position = [153 151 123 60];
 
             % Create InjWellConstantRateButton
             app.InjWellConstantRateButton = uiradiobutton(app.InjWellControlButtonGroup);
             app.InjWellConstantRateButton.Text = 'Constant Rate';
-            app.InjWellConstantRateButton.Position = [11 44 99 22];
+            app.InjWellConstantRateButton.Position = [11 34 99 22];
             app.InjWellConstantRateButton.Value = true;
 
             % Create InjWellConstantBHPButton
             app.InjWellConstantBHPButton = uiradiobutton(app.InjWellControlButtonGroup);
             app.InjWellConstantBHPButton.Text = 'Constant BHP';
-            app.InjWellConstantBHPButton.Position = [11 17 98 22];
+            app.InjWellConstantBHPButton.Position = [11 7 98 22];
 
             % Create InjWellRateEditField
             app.InjWellRateEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
             app.InjWellRateEditField.Limits = [0 Inf];
-            app.InjWellRateEditField.Position = [215 177 61 22];
+            app.InjWellRateEditField.Position = [267 184 61 22];
             app.InjWellRateEditField.Value = 1;
 
             % Create InjWellBHPEditField
             app.InjWellBHPEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
-            app.InjWellBHPEditField.Position = [215 149 61 22];
+            app.InjWellBHPEditField.Position = [267 156 61 22];
             app.InjWellBHPEditField.Value = 100;
 
             % Create InjWellRateUnitDropDown
             app.InjWellRateUnitDropDown = uidropdown(app.WellsInjectorPanel);
             app.InjWellRateUnitDropDown.Items = {'m³/s', 'm³/h', 'm³/day', 'STB/h', 'STB/day', 'kg/s', 'kg/day'};
-            app.InjWellRateUnitDropDown.Position = [287 177 73 22];
+            app.InjWellRateUnitDropDown.Position = [339 184 73 22];
             app.InjWellRateUnitDropDown.Value = 'm³/h';
 
             % Create InjWellBHPUnitDropDown
             app.InjWellBHPUnitDropDown = uidropdown(app.WellsInjectorPanel);
             app.InjWellBHPUnitDropDown.Items = {'bara', 'Pa', 'MPa', 'psi'};
-            app.InjWellBHPUnitDropDown.Position = [287 149 73 22];
+            app.InjWellBHPUnitDropDown.Position = [339 156 73 22];
             app.InjWellBHPUnitDropDown.Value = 'bara';
 
             % Create BottomHolePointLabel
             app.BottomHolePointLabel = uilabel(app.WellsInjectorPanel);
             app.BottomHolePointLabel.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.BottomHolePointLabel.Position = [76 77 102 22];
+            app.BottomHolePointLabel.Position = [30 77 102 22];
             app.BottomHolePointLabel.Text = 'Bottom Hole Point';
 
             % Create xLabel_18
             app.xLabel_18 = uilabel(app.WellsInjectorPanel);
             app.xLabel_18.HorizontalAlignment = 'right';
             app.xLabel_18.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.xLabel_18.Position = [166 77 25 22];
+            app.xLabel_18.Position = [123 77 25 22];
             app.xLabel_18.Text = 'x';
 
             % Create InjWellPointxEditField
@@ -5357,14 +5413,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.InjWellPointxEditField.Limits = [0 Inf];
             app.InjWellPointxEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellPointxEditFieldValueChanged, true);
             app.InjWellPointxEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.InjWellPointxEditField.Position = [197 77 49 22];
+            app.InjWellPointxEditField.Position = [154 77 61 22];
             app.InjWellPointxEditField.Value = 1;
 
             % Create xLabel_19
             app.xLabel_19 = uilabel(app.WellsInjectorPanel);
             app.xLabel_19.HorizontalAlignment = 'right';
             app.xLabel_19.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.xLabel_19.Position = [166 23 25 22];
+            app.xLabel_19.Position = [123 23 25 22];
             app.xLabel_19.Text = 'z';
 
             % Create InjWellPointzEditField
@@ -5372,14 +5428,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.InjWellPointzEditField.Limits = [0 Inf];
             app.InjWellPointzEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellPointzEditFieldValueChanged, true);
             app.InjWellPointzEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.InjWellPointzEditField.Position = [197 23 49 22];
+            app.InjWellPointzEditField.Position = [154 23 61 22];
             app.InjWellPointzEditField.Value = 10;
 
             % Create xLabel_20
             app.xLabel_20 = uilabel(app.WellsInjectorPanel);
             app.xLabel_20.HorizontalAlignment = 'right';
             app.xLabel_20.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.xLabel_20.Position = [166 50 25 22];
+            app.xLabel_20.Position = [123 50 25 22];
             app.xLabel_20.Text = 'y';
 
             % Create InjWellPointyEditField
@@ -5387,24 +5443,30 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.InjWellPointyEditField.Limits = [0 Inf];
             app.InjWellPointyEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellPointyEditFieldValueChanged, true);
             app.InjWellPointyEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.InjWellPointyEditField.Position = [197 50 49 22];
+            app.InjWellPointyEditField.Position = [154 50 61 22];
             app.InjWellPointyEditField.Value = 1;
 
             % Create InjWellTempUnitDropDown
             app.InjWellTempUnitDropDown = uidropdown(app.WellsInjectorPanel);
             app.InjWellTempUnitDropDown.Items = {'K', '°C', '°F'};
-            app.InjWellTempUnitDropDown.Position = [226 105 68 22];
+            app.InjWellTempUnitDropDown.Position = [226 114 68 22];
             app.InjWellTempUnitDropDown.Value = '°C';
 
             % Create FluidTemperatureLabel
             app.FluidTemperatureLabel = uilabel(app.WellsInjectorPanel);
             app.FluidTemperatureLabel.HorizontalAlignment = 'right';
-            app.FluidTemperatureLabel.Position = [37 105 102 22];
+            app.FluidTemperatureLabel.Position = [37 114 102 22];
             app.FluidTemperatureLabel.Text = 'Fluid Temperature';
 
             % Create InjWellTempEditField
             app.InjWellTempEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
-            app.InjWellTempEditField.Position = [154 105 61 22];
+            app.InjWellTempEditField.Position = [154 114 61 22];
+
+            % Create ControlTypeLabel
+            app.ControlTypeLabel = uilabel(app.WellsInjectorPanel);
+            app.ControlTypeLabel.Tooltip = {'Cartesian cell coordinates of well setting point.'};
+            app.ControlTypeLabel.Position = [66 170 73 22];
+            app.ControlTypeLabel.Text = 'Control Type';
 
             % Create WellsProducerPanel
             app.WellsProducerPanel = uipanel(app.WellsTab);
@@ -5415,7 +5477,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             % Create ProdWellRadiusUnitDropDown
             app.ProdWellRadiusUnitDropDown = uidropdown(app.WellsProducerPanel);
             app.ProdWellRadiusUnitDropDown.Items = {'mm', 'inch'};
-            app.ProdWellRadiusUnitDropDown.Position = [226 220 68 22];
+            app.ProdWellRadiusUnitDropDown.Position = [226 226 68 22];
             app.ProdWellRadiusUnitDropDown.Value = 'mm';
 
             % Create ProdWellControlButtonGroup
@@ -5423,76 +5485,76 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ProdWellControlButtonGroup.AutoResizeChildren = 'off';
             app.ProdWellControlButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ProdWellControlButtonGroupSelectionChanged, true);
             app.ProdWellControlButtonGroup.BorderType = 'none';
-            app.ProdWellControlButtonGroup.Position = [101 135 123 70];
+            app.ProdWellControlButtonGroup.Position = [151 151 123 60];
 
             % Create ProdWellConstantRateButton
             app.ProdWellConstantRateButton = uiradiobutton(app.ProdWellControlButtonGroup);
             app.ProdWellConstantRateButton.Text = 'Constant Rate';
-            app.ProdWellConstantRateButton.Position = [11 44 99 22];
+            app.ProdWellConstantRateButton.Position = [11 34 99 22];
 
             % Create ProdWellConstantBHPButton
             app.ProdWellConstantBHPButton = uiradiobutton(app.ProdWellControlButtonGroup);
             app.ProdWellConstantBHPButton.Text = 'Constant BHP';
-            app.ProdWellConstantBHPButton.Position = [11 16 98 22];
+            app.ProdWellConstantBHPButton.Position = [11 6 98 22];
             app.ProdWellConstantBHPButton.Value = true;
 
             % Create ProdWellRateUnitDropDown
             app.ProdWellRateUnitDropDown = uidropdown(app.WellsProducerPanel);
             app.ProdWellRateUnitDropDown.Items = {'m³/s', 'm³/h', 'm³/day', 'STB/h', 'STB/day', 'kg/s', 'kg/day'};
-            app.ProdWellRateUnitDropDown.Position = [287 177 73 22];
+            app.ProdWellRateUnitDropDown.Position = [337 183 73 22];
             app.ProdWellRateUnitDropDown.Value = 'm³/h';
 
             % Create ProdWellBHPUnitDropDown
             app.ProdWellBHPUnitDropDown = uidropdown(app.WellsProducerPanel);
             app.ProdWellBHPUnitDropDown.Items = {'bara', 'Pa', 'MPa', 'psi'};
-            app.ProdWellBHPUnitDropDown.Position = [287 149 73 22];
+            app.ProdWellBHPUnitDropDown.Position = [337 155 73 22];
             app.ProdWellBHPUnitDropDown.Value = 'bara';
 
             % Create WellNameEditField_2Label
             app.WellNameEditField_2Label = uilabel(app.WellsProducerPanel);
             app.WellNameEditField_2Label.HorizontalAlignment = 'right';
-            app.WellNameEditField_2Label.Position = [76 256 64 22];
+            app.WellNameEditField_2Label.Position = [76 263 64 22];
             app.WellNameEditField_2Label.Text = 'Well Name';
 
             % Create ProdWellNameEditField
             app.ProdWellNameEditField = uieditfield(app.WellsProducerPanel, 'text');
             app.ProdWellNameEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellNameEditFieldValueChanged, true);
-            app.ProdWellNameEditField.Position = [155 256 139 22];
+            app.ProdWellNameEditField.Position = [155 263 171 22];
             app.ProdWellNameEditField.Value = 'Prod';
 
             % Create RadiusEditField_2Label
             app.RadiusEditField_2Label = uilabel(app.WellsProducerPanel);
             app.RadiusEditField_2Label.HorizontalAlignment = 'right';
-            app.RadiusEditField_2Label.Position = [96 220 43 22];
+            app.RadiusEditField_2Label.Position = [96 226 43 22];
             app.RadiusEditField_2Label.Text = 'Radius';
 
             % Create ProdWellRadiusEditField
             app.ProdWellRadiusEditField = uieditfield(app.WellsProducerPanel, 'numeric');
-            app.ProdWellRadiusEditField.Position = [154 220 61 22];
+            app.ProdWellRadiusEditField.Position = [155 226 61 22];
             app.ProdWellRadiusEditField.Value = 70;
 
             % Create ProdWellRateEditField
             app.ProdWellRateEditField = uieditfield(app.WellsProducerPanel, 'numeric');
             app.ProdWellRateEditField.Limits = [0 Inf];
-            app.ProdWellRateEditField.Position = [215 177 61 22];
+            app.ProdWellRateEditField.Position = [265 183 61 22];
             app.ProdWellRateEditField.Value = 1;
 
             % Create ProdWellBHPEditField
             app.ProdWellBHPEditField = uieditfield(app.WellsProducerPanel, 'numeric');
-            app.ProdWellBHPEditField.Position = [215 149 61 22];
+            app.ProdWellBHPEditField.Position = [265 155 61 22];
             app.ProdWellBHPEditField.Value = 100;
 
             % Create up
             app.up = uilabel(app.WellsProducerPanel);
             app.up.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.up.Position = [76 77 102 22];
+            app.up.Position = [34 114 102 22];
             app.up.Text = 'Bottom Hole Point';
 
             % Create xLabel_21
             app.xLabel_21 = uilabel(app.WellsProducerPanel);
             app.xLabel_21.HorizontalAlignment = 'right';
             app.xLabel_21.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.xLabel_21.Position = [166 77 25 22];
+            app.xLabel_21.Position = [124 114 25 22];
             app.xLabel_21.Text = 'x';
 
             % Create ProdWellPointxEditField
@@ -5500,14 +5562,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ProdWellPointxEditField.Limits = [0 Inf];
             app.ProdWellPointxEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellPointxEditFieldValueChanged, true);
             app.ProdWellPointxEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.ProdWellPointxEditField.Position = [197 77 49 22];
+            app.ProdWellPointxEditField.Position = [155 114 61 22];
             app.ProdWellPointxEditField.Value = 10;
 
             % Create xLabel_22
             app.xLabel_22 = uilabel(app.WellsProducerPanel);
             app.xLabel_22.HorizontalAlignment = 'right';
             app.xLabel_22.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.xLabel_22.Position = [166 23 25 22];
+            app.xLabel_22.Position = [124 60 25 22];
             app.xLabel_22.Text = 'z';
 
             % Create ProdWellPointzEditField
@@ -5515,14 +5577,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ProdWellPointzEditField.Limits = [0 Inf];
             app.ProdWellPointzEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellPointzEditFieldValueChanged, true);
             app.ProdWellPointzEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.ProdWellPointzEditField.Position = [197 23 49 22];
+            app.ProdWellPointzEditField.Position = [155 60 61 22];
             app.ProdWellPointzEditField.Value = 10;
 
             % Create xLabel_23
             app.xLabel_23 = uilabel(app.WellsProducerPanel);
             app.xLabel_23.HorizontalAlignment = 'right';
             app.xLabel_23.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.xLabel_23.Position = [166 50 25 22];
+            app.xLabel_23.Position = [124 87 25 22];
             app.xLabel_23.Text = 'y';
 
             % Create ProdWellPointyEditField
@@ -5530,8 +5592,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ProdWellPointyEditField.Limits = [0 Inf];
             app.ProdWellPointyEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellPointyEditFieldValueChanged, true);
             app.ProdWellPointyEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
-            app.ProdWellPointyEditField.Position = [197 50 49 22];
+            app.ProdWellPointyEditField.Position = [155 87 61 22];
             app.ProdWellPointyEditField.Value = 10;
+
+            % Create ControlTypeLabel_2
+            app.ControlTypeLabel_2 = uilabel(app.WellsProducerPanel);
+            app.ControlTypeLabel_2.Tooltip = {'Cartesian cell coordinates of well setting point.'};
+            app.ControlTypeLabel_2.Position = [66 170 73 22];
+            app.ControlTypeLabel_2.Text = 'Control Type';
 
             % Create SimulationTab
             app.SimulationTab = uitab(app.GlobalTabGroup);
@@ -5681,7 +5749,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.RampupStepsEditField.Value = 1;
 
             % Create Panel
-            app.Panel = uipanel(app.TaskBuilderUIFigure);
+            app.Panel = uipanel(app.GraphicalTaskBuilderUIFigure);
             app.Panel.AutoResizeChildren = 'off';
             app.Panel.Position = [1 1 1034 51];
 
@@ -5710,7 +5778,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ResetButton.Text = 'Reset';
 
             % Create Panel_2
-            app.Panel_2 = uipanel(app.TaskBuilderUIFigure);
+            app.Panel_2 = uipanel(app.GraphicalTaskBuilderUIFigure);
             app.Panel_2.AutoResizeChildren = 'off';
             app.Panel_2.Position = [1 51 1034 329];
 
@@ -5733,85 +5801,107 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ModelPanel = uipanel(app.Panel_2);
             app.ModelPanel.AutoResizeChildren = 'off';
             app.ModelPanel.Title = 'Model';
-            app.ModelPanel.Position = [576 91 200 184];
+            app.ModelPanel.Position = [576 68 200 207];
 
             % Create TotalcellsLabel
             app.TotalcellsLabel = uilabel(app.ModelPanel);
+            app.TotalcellsLabel.BackgroundColor = [0.9412 0.9412 0.9412];
             app.TotalcellsLabel.HorizontalAlignment = 'right';
-            app.TotalcellsLabel.Position = [25 123 58 22];
+            app.TotalcellsLabel.Position = [25 146 58 22];
             app.TotalcellsLabel.Text = 'Total cells';
 
             % Create TotelCellsEditField
             app.TotelCellsEditField = uieditfield(app.ModelPanel, 'numeric');
             app.TotelCellsEditField.Editable = 'off';
-            app.TotelCellsEditField.Position = [92 123 71 22];
+            app.TotelCellsEditField.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.TotelCellsEditField.Position = [92 146 71 22];
 
             % Create GridsizewarningLabel_4
             app.GridsizewarningLabel_4 = uilabel(app.ModelPanel);
             app.GridsizewarningLabel_4.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_4.Position = [25 90 82 22];
+            app.GridsizewarningLabel_4.Position = [61 102 82 22];
             app.GridsizewarningLabel_4.Text = 'Layer enabled';
 
             % Create LayerEnabledLamp
             app.LayerEnabledLamp = uilamp(app.ModelPanel);
-            app.LayerEnabledLamp.Position = [116 94 12 12];
+            app.LayerEnabledLamp.Position = [152 106 12 12];
             app.LayerEnabledLamp.Color = [0.8 0.8 0.8];
 
             % Create GridsizewarningLabel_5
             app.GridsizewarningLabel_5 = uilabel(app.ModelPanel);
             app.GridsizewarningLabel_5.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_5.Position = [33 71 74 22];
-            app.GridsizewarningLabel_5.Text = 'BCs enabled';
+            app.GridsizewarningLabel_5.Position = [73 39 70 22];
+            app.GridsizewarningLabel_5.Text = 'Default BCs';
 
             % Create BCsEnabledLamp
             app.BCsEnabledLamp = uilamp(app.ModelPanel);
-            app.BCsEnabledLamp.Position = [116 75 12 12];
+            app.BCsEnabledLamp.Position = [152 43 12 12];
             app.BCsEnabledLamp.Color = [0.8 0.8 0.8];
+
+            % Create GridsizewarningLabel_6
+            app.GridsizewarningLabel_6 = uilabel(app.ModelPanel);
+            app.GridsizewarningLabel_6.HorizontalAlignment = 'right';
+            app.GridsizewarningLabel_6.Position = [99 81 44 22];
+            app.GridsizewarningLabel_6.Text = 'Gravity';
+
+            % Create GravityEnabledLamp
+            app.GravityEnabledLamp = uilamp(app.ModelPanel);
+            app.GravityEnabledLamp.Position = [152 85 12 12];
+            app.GravityEnabledLamp.Color = [0.8 0.8 0.8];
+
+            % Create GridsizewarningLabel_7
+            app.GridsizewarningLabel_7 = uilabel(app.ModelPanel);
+            app.GridsizewarningLabel_7.HorizontalAlignment = 'right';
+            app.GridsizewarningLabel_7.Position = [112 60 31 22];
+            app.GridsizewarningLabel_7.Text = 'EOS';
+
+            % Create EOSEnabledLamp
+            app.EOSEnabledLamp = uilamp(app.ModelPanel);
+            app.EOSEnabledLamp.Position = [152 64 12 12];
+            app.EOSEnabledLamp.Color = [0.8 0.8 0.8];
+
+            % Create GridsizewarningLabel_8
+            app.GridsizewarningLabel_8 = uilabel(app.ModelPanel);
+            app.GridsizewarningLabel_8.HorizontalAlignment = 'right';
+            app.GridsizewarningLabel_8.Position = [47 18 96 22];
+            app.GridsizewarningLabel_8.Text = 'Initial Equilibrium';
+
+            % Create InitialEquilibriumEnabledLamp
+            app.InitialEquilibriumEnabledLamp = uilamp(app.ModelPanel);
+            app.InitialEquilibriumEnabledLamp.Position = [152 22 12 12];
+            app.InitialEquilibriumEnabledLamp.Color = [0.8 0.8 0.8];
 
             % Create WarningsPanel
             app.WarningsPanel = uipanel(app.Panel_2);
             app.WarningsPanel.AutoResizeChildren = 'off';
             app.WarningsPanel.Title = 'Warnings';
-            app.WarningsPanel.Position = [800 91 199 184];
+            app.WarningsPanel.Position = [800 185 199 90];
 
             % Create GridsizewarningLabel
             app.GridsizewarningLabel = uilabel(app.WarningsPanel);
             app.GridsizewarningLabel.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel.Position = [61 123 98 22];
+            app.GridsizewarningLabel.Position = [61 29 98 22];
             app.GridsizewarningLabel.Text = 'Grid size warning';
 
             % Create GridSizeWarningLamp
             app.GridSizeWarningLamp = uilamp(app.WarningsPanel);
             app.GridSizeWarningLamp.Tooltip = {'Depending on the system building previews and simulating models takes a long time for a large amount of grid cells.'};
-            app.GridSizeWarningLamp.Position = [168 127 12 12];
+            app.GridSizeWarningLamp.Position = [168 33 12 12];
             app.GridSizeWarningLamp.Color = [0.8 0.8 0.8];
 
             % Create GridsizewarningLabel_2
             app.GridsizewarningLabel_2 = uilabel(app.WarningsPanel);
             app.GridsizewarningLabel_2.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_2.Position = [20 85 139 22];
+            app.GridsizewarningLabel_2.Position = [20 9 139 22];
             app.GridsizewarningLabel_2.Text = 'Overwriting Task warning';
 
             % Create OverwritingTaskWarningLamp
             app.OverwritingTaskWarningLamp = uilamp(app.WarningsPanel);
-            app.OverwritingTaskWarningLamp.Position = [168 89 12 12];
+            app.OverwritingTaskWarningLamp.Position = [168 13 12 12];
             app.OverwritingTaskWarningLamp.Color = [0.8 0.8 0.8];
 
-            % Create GridsizewarningLabel_3
-            app.GridsizewarningLabel_3 = uilabel(app.WarningsPanel);
-            app.GridsizewarningLabel_3.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_3.Enable = 'off';
-            app.GridsizewarningLabel_3.Position = [50 104 109 22];
-            app.GridsizewarningLabel_3.Text = 'Time steps warning';
-
-            % Create TimeStepsWarningLamp
-            app.TimeStepsWarningLamp = uilamp(app.WarningsPanel);
-            app.TimeStepsWarningLamp.Enable = 'off';
-            app.TimeStepsWarningLamp.Position = [168 108 12 12];
-            app.TimeStepsWarningLamp.Color = [0.8 0.8 0.8];
-
             % Show the figure after all components are created
-            app.TaskBuilderUIFigure.Visible = 'on';
+            app.GraphicalTaskBuilderUIFigure.Visible = 'on';
         end
     end
 
@@ -5830,14 +5920,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
                 createComponents(app)
 
                 % Register the app with App Designer
-                registerApp(app, app.TaskBuilderUIFigure)
+                registerApp(app, app.GraphicalTaskBuilderUIFigure)
 
                 % Execute the startup function
                 runStartupFcn(app, @(app)startupFcn(app, varargin{:}))
             else
 
                 % Focus the running singleton app
-                figure(runningApp.TaskBuilderUIFigure)
+                figure(runningApp.GraphicalTaskBuilderUIFigure)
 
                 app = runningApp;
             end
@@ -5851,7 +5941,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         function delete(app)
 
             % Delete UIFigure when app is deleted
-            delete(app.TaskBuilderUIFigure)
+            delete(app.GraphicalTaskBuilderUIFigure)
         end
     end
 end

@@ -4,6 +4,7 @@ function profilePlot(resultHandler, p_plot)
     data = resultHandler.data;
     dataStruct = [data{:}];
     pressure = [dataStruct(:).pressure] / 1e5;
+    pressure = pressure(:,end);
 
     diagIndices = sub2ind([50 50], 1:50, 1:50);
     diagPressures = pressure(diagIndices);

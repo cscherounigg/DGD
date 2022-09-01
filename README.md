@@ -1,2 +1,0 @@
-# DGD
-DeepGeoDoublet

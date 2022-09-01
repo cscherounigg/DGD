@@ -2,14 +2,14 @@ classdef TaskEditor_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        TaskEditorUIFigure   matlab.ui.Figure
-        TaskGenericsLabel    matlab.ui.control.Label
-        TaskParametersLabel  matlab.ui.control.Label
-        ParamsTextArea       matlab.ui.control.TextArea
-        InfoLabel            matlab.ui.control.Label
-        QuitButton           matlab.ui.control.Button
-        SaveandExitButton    matlab.ui.control.Button
-        GenericTextArea      matlab.ui.control.TextArea
+        RawTaskEditorUIFigure  matlab.ui.Figure
+        TaskGenericsLabel      matlab.ui.control.Label
+        TaskParametersLabel    matlab.ui.control.Label
+        ParamsTextArea         matlab.ui.control.TextArea
+        InfoLabel              matlab.ui.control.Label
+        QuitButton             matlab.ui.control.Button
+        SaveandExitButton      matlab.ui.control.Button
+        GenericTextArea        matlab.ui.control.TextArea
     end
 
     
@@ -23,7 +23,7 @@ classdef TaskEditor_exported < matlab.apps.AppBase
     methods (Access = private)
         
         function closeAppPrompt(app)
-            decision = uiconfirm(app.TaskEditorUIFigure, 'Quit without saving?',...
+            decision = uiconfirm(app.RawTaskEditorUIFigure, 'Quit without saving?',...
                 'Exiting', 'Icon', 'warning', 'Options', {'Continue', 'Save', 'Cancel'});
             switch decision
                 case 'Save'
@@ -46,7 +46,8 @@ classdef TaskEditor_exported < matlab.apps.AppBase
 
         function saveTask(app)
             app.task.generic = jsondecode(cells2str(app.GenericTextArea.Value, ''));
-            app.task.params = jsondecode(cells2str(app.ParamsTextArea.Value, ''));
+            params = jsondecode(cells2str(app.ParamsTextArea.Value, ''));
+            app.task.params = transposeVectors(params);
             storeTask(app.task);
         end
     end
@@ -85,11 +86,11 @@ classdef TaskEditor_exported < matlab.apps.AppBase
                 app.globalConsts.AUTHOR_LASTNAME);
             app.InfoLabel.Text = labelStr;
             
-            experimentalEditorWarning(app.TaskEditorUIFigure)
+            experimentalEditorWarning(app.RawTaskEditorUIFigure)
         end
 
-        % Close request function: TaskEditorUIFigure
-        function TaskEditorUIFigureCloseRequest(app, event)
+        % Close request function: RawTaskEditorUIFigure
+        function RawTaskEditorUIFigureCloseRequest(app, event)
             app.closeAppPrompt()
         end
 
@@ -111,51 +112,51 @@ classdef TaskEditor_exported < matlab.apps.AppBase
         % Create UIFigure and components
         function createComponents(app)
 
-            % Create TaskEditorUIFigure and hide until all components are created
-            app.TaskEditorUIFigure = uifigure('Visible', 'off');
-            app.TaskEditorUIFigure.Position = [100 100 649 684];
-            app.TaskEditorUIFigure.Name = 'Task Editor';
-            app.TaskEditorUIFigure.CloseRequestFcn = createCallbackFcn(app, @TaskEditorUIFigureCloseRequest, true);
+            % Create RawTaskEditorUIFigure and hide until all components are created
+            app.RawTaskEditorUIFigure = uifigure('Visible', 'off');
+            app.RawTaskEditorUIFigure.Position = [100 100 649 684];
+            app.RawTaskEditorUIFigure.Name = 'Raw Task Editor';
+            app.RawTaskEditorUIFigure.CloseRequestFcn = createCallbackFcn(app, @RawTaskEditorUIFigureCloseRequest, true);
 
             % Create GenericTextArea
-            app.GenericTextArea = uitextarea(app.TaskEditorUIFigure);
+            app.GenericTextArea = uitextarea(app.RawTaskEditorUIFigure);
             app.GenericTextArea.Position = [48 487 558 149];
 
             % Create SaveandExitButton
-            app.SaveandExitButton = uibutton(app.TaskEditorUIFigure, 'push');
+            app.SaveandExitButton = uibutton(app.RawTaskEditorUIFigure, 'push');
             app.SaveandExitButton.ButtonPushedFcn = createCallbackFcn(app, @SaveandExitButtonPushed, true);
             app.SaveandExitButton.Position = [395 17 100 22];
             app.SaveandExitButton.Text = 'Save and Exit';
 
             % Create QuitButton
-            app.QuitButton = uibutton(app.TaskEditorUIFigure, 'push');
+            app.QuitButton = uibutton(app.RawTaskEditorUIFigure, 'push');
             app.QuitButton.ButtonPushedFcn = createCallbackFcn(app, @QuitButtonPushed, true);
             app.QuitButton.Position = [507 17 100 22];
             app.QuitButton.Text = 'Quit';
 
             % Create InfoLabel
-            app.InfoLabel = uilabel(app.TaskEditorUIFigure);
+            app.InfoLabel = uilabel(app.RawTaskEditorUIFigure);
             app.InfoLabel.HorizontalAlignment = 'center';
             app.InfoLabel.FontSize = 9;
             app.InfoLabel.Position = [6 14 188 22];
             app.InfoLabel.Text = {'Version X.X'; 'Copyright (C) XXXX Author'};
 
             % Create ParamsTextArea
-            app.ParamsTextArea = uitextarea(app.TaskEditorUIFigure);
+            app.ParamsTextArea = uitextarea(app.RawTaskEditorUIFigure);
             app.ParamsTextArea.Position = [48 62 558 388];
 
             % Create TaskParametersLabel
-            app.TaskParametersLabel = uilabel(app.TaskEditorUIFigure);
+            app.TaskParametersLabel = uilabel(app.RawTaskEditorUIFigure);
             app.TaskParametersLabel.Position = [49 449 96 22];
             app.TaskParametersLabel.Text = 'Task Parameters';
 
             % Create TaskGenericsLabel
-            app.TaskGenericsLabel = uilabel(app.TaskEditorUIFigure);
+            app.TaskGenericsLabel = uilabel(app.RawTaskEditorUIFigure);
             app.TaskGenericsLabel.Position = [50 635 82 22];
             app.TaskGenericsLabel.Text = 'Task Generics';
 
             % Show the figure after all components are created
-            app.TaskEditorUIFigure.Visible = 'on';
+            app.RawTaskEditorUIFigure.Visible = 'on';
         end
     end
 
@@ -174,14 +175,14 @@ classdef TaskEditor_exported < matlab.apps.AppBase
                 createComponents(app)
 
                 % Register the app with App Designer
-                registerApp(app, app.TaskEditorUIFigure)
+                registerApp(app, app.RawTaskEditorUIFigure)
 
                 % Execute the startup function
                 runStartupFcn(app, @(app)startupFcn(app, varargin{:}))
             else
 
                 % Focus the running singleton app
-                figure(runningApp.TaskEditorUIFigure)
+                figure(runningApp.RawTaskEditorUIFigure)
 
                 app = runningApp;
             end
@@ -195,7 +196,7 @@ classdef TaskEditor_exported < matlab.apps.AppBase
         function delete(app)
 
             % Delete UIFigure when app is deleted
-            delete(app.TaskEditorUIFigure)
+            delete(app.RawTaskEditorUIFigure)
         end
     end
 end
