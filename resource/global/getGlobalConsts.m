@@ -22,7 +22,7 @@ function globalConsts = getGlobalConsts()
 %   Detailed explanation goes here
 
 globalConsts.PROGRAM_NAME = 'DeepGeoDoublet';
-globalConsts.VERSION = '1.0.0-rc.5';
+globalConsts.VERSION = '1.0.0-rc.6';
 globalConsts.AUTHOR_FIRSTNAME = 'Christoph';
 globalConsts.AUTHOR_LASTNAME = 'Scherounigg';
 globalConsts.YEAR = '2022';

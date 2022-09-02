@@ -156,6 +156,7 @@ classdef Task
             task.params.wells.inj.control.pressure      = defaults.DEFAULT_WELLS_INJ_CONTROL_PRESSURE;
             task.params.wells.inj.temperature           = defaults.DEFAULT_WELLS_INJ_TEMPERATURE;
             task.params.wells.inj.point                 = defaults.DEFAULT_WELLS_INJ_BOTTOM_POINT;
+            task.params.wells.inj.topOfPerf             = defaults.DEFAULT_WELLS_INJ_TOP_OF_PERF;
             
             task.params.wells.prod.name             = defaults.DEFAULT_WELLS_PROD_NAME;
             task.params.wells.prod.radius           = defaults.DEFAULT_WELLS_PROD_RADIUS;
@@ -163,6 +164,7 @@ classdef Task
             task.params.wells.prod.control.rate     = defaults.DEFAULT_WELLS_PROD_CONTROL_RATE;
             task.params.wells.prod.control.pressure = defaults.DEFAULT_WELLS_PROD_CONTROL_PRESSURE;
             task.params.wells.prod.point            = defaults.DEFAULT_WELLS_PROD_BOTTOM_POINT;
+            task.params.wells.prod.topOfPerf        = defaults.DEFAULT_WELLS_PROD_TOP_OF_PERF;
             
             % Simulation
             task.params.simulation.endTime                   = defaults.DEFAULT_SIMULATION_END_TIME;
@@ -382,7 +384,8 @@ classdef Task
                 task.params.wells.inj.name, type='inj', ...
                 operatingCondition=task.params.wells.inj.control.type, ...
                 operatingValue=operatingValue, ...
-                temperature=task.params.wells.inj.temperature, color='b');
+                temperature=task.params.wells.inj.temperature, color='b', ...
+                perforationTopDepth=task.params.wells.inj.topOfPerf);
             
             % Producer
             switch task.params.wells.prod.control.type
@@ -396,7 +399,8 @@ classdef Task
                 task.params.wells.prod.radius, task.params.wells.prod.name, ...
                 type='prod', ...
                 operatingCondition=task.params.wells.prod.control.type, ...
-                operatingValue=operatingValue, color='r');
+                operatingValue=operatingValue, color='r', ...
+                perforationTopDepth=task.params.wells.prod.topOfPerf);
 
             task.model.wells = task.model.wells.updateThermalProperties();
         end

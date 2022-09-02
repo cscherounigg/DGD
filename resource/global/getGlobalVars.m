@@ -153,6 +153,7 @@ globalVars.DEFAULT_WELLS_INJ_CONTROL_RATE        = .1; % m³/s
 globalVars.DEFAULT_WELLS_INJ_CONTROL_PRESSURE    = 120*barsa; % Pa
 globalVars.DEFAULT_WELLS_INJ_TEMPERATURE         = 293.15; % K
 globalVars.DEFAULT_WELLS_INJ_BOTTOM_POINT        = [2 2 10];
+globalVars.DEFAULT_WELLS_INJ_TOP_OF_PERF         = 1;
 
 globalVars.DEFAULT_WELLS_PROD_NAME               = 'Prod';
 globalVars.DEFAULT_WELLS_PROD_RADIUS             = 70*milli*meter; % m
@@ -160,6 +161,7 @@ globalVars.DEFAULT_WELLS_PROD_CONTROL_TYPE       = 'bhp'; % Options: 'bhp', 'rat
 globalVars.DEFAULT_WELLS_PROD_CONTROL_RATE       = .1; % m³/s
 globalVars.DEFAULT_WELLS_PROD_CONTROL_PRESSURE   = 70*barsa; % Pa
 globalVars.DEFAULT_WELLS_PROD_BOTTOM_POINT       = [19 19 10];
+globalVars.DEFAULT_WELLS_PROD_TOP_OF_PERF        = 1;
 
 % Simulation
 globalVars.DEFAULT_SIMULATION_END_TIME                      = 10*day; % seconds

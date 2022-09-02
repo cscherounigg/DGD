@@ -416,6 +416,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         ReservoirInitPressureUnitDropDown  matlab.ui.control.DropDown
         WellsTab                        matlab.ui.container.Tab
         WellsProducerPanel              matlab.ui.container.Panel
+        ProdWellTopOfPerforationEditField  matlab.ui.control.NumericEditField
+        FluidTemperatureLabel_3         matlab.ui.control.Label
         ControlTypeLabel_2              matlab.ui.control.Label
         ProdWellPointyEditField         matlab.ui.control.NumericEditField
         xLabel_23                       matlab.ui.control.Label
@@ -437,6 +439,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         ProdWellConstantRateButton      matlab.ui.control.RadioButton
         ProdWellRadiusUnitDropDown      matlab.ui.control.DropDown
         WellsInjectorPanel              matlab.ui.container.Panel
+        InjWellTopOfPerforationEditField  matlab.ui.control.NumericEditField
+        FluidTemperatureLabel_2         matlab.ui.control.Label
         ControlTypeLabel                matlab.ui.control.Label
         InjWellTempEditField            matlab.ui.control.NumericEditField
         FluidTemperatureLabel           matlab.ui.control.Label
@@ -640,6 +644,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             params.wells.inj.control.pressure = app.InjWellBHPEditField.Value * mapUnitToMRST(app.InjWellBHPUnitDropDown.Value);
             params.wells.inj.temperature = temperature2kelvin(app.InjWellTempEditField.Value, app.InjWellTempUnitDropDown.Value);
             params.wells.inj.point = app.getInjWellBottomPoint();
+            params.wells.inj.topOfPerf = app.InjWellTopOfPerforationEditField.Value;
             
             params.wells.prod.name = app.ProdWellNameEditField.Value;
             params.wells.prod.radius = app.ProdWellRadiusEditField.Value * mapUnitToMRST(app.ProdWellRadiusUnitDropDown.Value);
@@ -647,6 +652,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             params.wells.prod.control.rate = app.ProdWellRateEditField.Value * mapUnitToMRST(app.ProdWellRateUnitDropDown.Value);
             params.wells.prod.control.pressure = app.ProdWellBHPEditField.Value * mapUnitToMRST(app.ProdWellBHPUnitDropDown.Value);
             params.wells.prod.point = app.getProdWellBottomPoint();
+            params.wells.prod.topOfPerf = app.ProdWellTopOfPerforationEditField.Value;
 
             % Simulation
             params.simulation.endTime = app.EndTimeEditField.Value * mapUnitToMRST(app.EndTimeUnitDropDown.Value);
@@ -775,13 +781,23 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.InjWellBHPEditField.Value = params.wells.inj.control.pressure * mapUnitToMRSTReverse(app.InjWellBHPUnitDropDown.Value);
             app.InjWellTempEditField.Value = kelvin2temperature(params.wells.inj.temperature, app.InjWellTempUnitDropDown.Value);
             app.setInjWellBottomPoint(params.wells.inj.point);
-            
+            if isfield(params.wells.inj, 'topOfPerf') % TODO for future versions: Remove compatibility statement
+                app.InjWellTopOfPerforationEditField.Value = params.wells.inj.topOfPerf;
+            else
+                app.InjWellTopOfPerforationEditField.Value = app.globalVars.DEFAULT_WELLS_INJ_TOP_OF_PERF;
+            end
+
             app.ProdWellNameEditField.Value = params.wells.prod.name;
             app.ProdWellRadiusEditField.Value = params.wells.prod.radius * mapUnitToMRSTReverse(app.ProdWellRadiusUnitDropDown.Value);
             app.setProdWellOperatingCondButtonConfig(params.wells.prod.control.type);
             app.ProdWellRateEditField.Value = params.wells.prod.control.rate * mapUnitToMRSTReverse(app.ProdWellRateUnitDropDown.Value);
             app.ProdWellBHPEditField.Value = params.wells.prod.control.pressure * mapUnitToMRSTReverse(app.ProdWellBHPUnitDropDown.Value);
             app.setProdWellBottomPoint(params.wells.prod.point);
+            if isfield(params.wells.prod, 'topOfPerf') % TODO for future versions: Remove compatibility statement
+                app.ProdWellTopOfPerforationEditField.Value = params.wells.prod.topOfPerf;
+            else
+                app.ProdWellTopOfPerforationEditField.Value = app.globalVars.DEFAULT_WELLS_PROD_TOP_OF_PERF;
+            end
 
             % Simulation
             app.EndTimeEditField.Value = params.simulation.endTime * mapUnitToMRSTReverse(app.EndTimeUnitDropDown.Value);
@@ -1815,6 +1831,34 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         %%%                  GUI Input Control Methods                  %%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Methods controlling the user input limitations (e.g. max/min values).
+        
+        function updateAllLimits(app)
+            % Temperatures
+            app.updateTemperatureMinLimit(app.BCxMinTempEditField, app.BCxMinTempUnitDropDown);
+            app.updateTemperatureMinLimit(app.BCxMaxTempEditField, app.BCxMaxTempUnitDropDown);
+            app.updateTemperatureMinLimit(app.BCyMinTempEditField, app.BCyMinTempUnitDropDown);
+            app.updateTemperatureMinLimit(app.BCyMaxTempEditField, app.BCyMaxTempUnitDropDown);
+            app.updateTemperatureMinLimit(app.BCzMinTempEditField, app.BCzMinTempUnitDropDown);
+            app.updateTemperatureMinLimit(app.BCzMaxTempEditField, app.BCzMaxTempUnitDropDown);
+
+            app.updateTemperatureMinLimit(app.ReservoirInitTempEditField, app.ReservoirInitTempUnitDropDown);
+
+            app.updateTemperatureMinLimit(app.InjWellTempEditField, app.InjWellTempUnitDropDown);
+
+            app.updateTemperatureMinLimit(app.MinReservoirTempEditField, app.MinReservoirTempUnitDropDown);
+            app.updateTemperatureMinLimit(app.MaxReservoirTempEditField, app.MaxReservoirTempUnitDropDown);
+
+            % Wells
+            app.updateWellsLimits();
+            
+        end
+        
+        function updateWellsLimits(app)
+            app.updateInjWellPositionLimits();
+            app.updateInjWellTopOfPerfLimits();
+            app.updateProdWellPositionLimits();
+            app.updateProdWellTopOfPerfLimits();
+        end
 
         function updateTemperatureMinLimit(app, tempField, unitField)
             minKelvin = 0; % K
@@ -1826,7 +1870,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             tempField.Limits = [minInUnit tempField.Limits(2)];
         end
 
-        function updateInjectionWellPositionLimits(app)
+        function updateInjWellPositionLimits(app)
             currentPos = app.getInjWellBottomPoint();
             gridDims = app.getGridDimsVector();
             if any(currentPos > gridDims)
@@ -1837,7 +1881,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.InjWellPointzEditField.Limits = [1 gridDims(3)];
         end
 
-        function updateProductionWellPositionLimits(app)
+        function updateProdWellPositionLimits(app)
             currentPos = app.getProdWellBottomPoint();
             gridDims = app.getGridDimsVector();
             if any(currentPos > gridDims)
@@ -1846,6 +1890,24 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ProdWellPointxEditField.Limits = [1 gridDims(1)];
             app.ProdWellPointyEditField.Limits = [1 gridDims(2)];
             app.ProdWellPointzEditField.Limits = [1 gridDims(3)];
+        end
+
+        function updateInjWellTopOfPerfLimits(app)
+            % Call updateInjWellPositionLimits first!
+            currentPos = app.getInjWellBottomPoint();
+            if app.InjWellTopOfPerforationEditField.Value > currentPos(3)
+                app.InjWellTopOfPerforationEditField.Value = 1;
+            end
+            app.InjWellTopOfPerforationEditField.Limits = [1 currentPos(3)];
+        end
+
+        function updateProdWellTopOfPerfLimits(app)
+            % Call updateProdWellPositionLimits first!
+            currentPos = app.getProdWellBottomPoint();
+            if app.ProdWellTopOfPerforationEditField.Value > currentPos(3)
+                app.ProdWellTopOfPerforationEditField.Value = 1;
+            end
+            app.ProdWellTopOfPerforationEditField.Limits = [1 currentPos(3)];
         end
 
         
@@ -2801,6 +2863,9 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Update GUI visibility
             app.updateGUIVisibility();
+
+            % Update GUI limits
+            app.updateAllLimits();
         end
 
         % Button pushed function: QuitButton
@@ -2815,22 +2880,19 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         % Value changed function: GridNxEditField
         function GridNxEditFieldValueChanged(app, event)
-            app.updateInjectionWellPositionLimits();
-            app.updateProductionWellPositionLimits();
+            app.updateWellsLimits();
             app.updateGrid();
         end
 
         % Value changed function: GridNyEditField
         function GridNyEditFieldValueChanged(app, event)
-            app.updateInjectionWellPositionLimits();
-            app.updateProductionWellPositionLimits();
+            app.updateWellsLimits();
             app.updateGrid();
         end
 
         % Value changed function: GridNzEditField
         function GridNzEditFieldValueChanged(app, event)
-            app.updateInjectionWellPositionLimits();
-            app.updateProductionWellPositionLimits();
+            app.updateWellsLimits();
             app.updateGrid();
         end
 
@@ -3110,6 +3172,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         % Value changed function: InjWellPointzEditField
         function InjWellPointzEditFieldValueChanged(app, event)
+            app.updateWellsLimits();
             app.updateWells();
         end
 
@@ -3130,6 +3193,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         % Value changed function: ProdWellPointzEditField
         function ProdWellPointzEditFieldValueChanged(app, event)
+            app.updateWellsLimits();
             app.updateWells();
         end
 
@@ -3614,6 +3678,16 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         % Value changed function: MaxReservoirTempUnitDropDown
         function MaxReservoirTempUnitDropDownValueChanged(app, event)
             app.updateTemperatureMinLimit(app.MaxReservoirTempEditField, app.MaxReservoirTempUnitDropDown);
+        end
+
+        % Value changed function: InjWellTopOfPerforationEditField
+        function InjWellTopOfPerforationEditFieldValueChanged(app, event)
+            app.updateWells();
+        end
+
+        % Value changed function: ProdWellTopOfPerforationEditField
+        function ProdWellTopOfPerforationEditFieldValueChanged(app, event)
+            app.updateWells();
         end
     end
 
@@ -6188,6 +6262,20 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ControlTypeLabel.Position = [66 170 73 22];
             app.ControlTypeLabel.Text = 'Control Type';
 
+            % Create FluidTemperatureLabel_2
+            app.FluidTemperatureLabel_2 = uilabel(app.WellsInjectorPanel);
+            app.FluidTemperatureLabel_2.HorizontalAlignment = 'right';
+            app.FluidTemperatureLabel_2.Position = [238 78 100 22];
+            app.FluidTemperatureLabel_2.Text = 'Top of Perforation';
+
+            % Create InjWellTopOfPerforationEditField
+            app.InjWellTopOfPerforationEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
+            app.InjWellTopOfPerforationEditField.Limits = [1 Inf];
+            app.InjWellTopOfPerforationEditField.RoundFractionalValues = 'on';
+            app.InjWellTopOfPerforationEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellTopOfPerforationEditFieldValueChanged, true);
+            app.InjWellTopOfPerforationEditField.Position = [353 78 61 22];
+            app.InjWellTopOfPerforationEditField.Value = 1;
+
             % Create WellsProducerPanel
             app.WellsProducerPanel = uipanel(app.WellsTab);
             app.WellsProducerPanel.AutoResizeChildren = 'off';
@@ -6324,6 +6412,20 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.ControlTypeLabel_2.Tooltip = {'Cartesian cell coordinates of well setting point.'};
             app.ControlTypeLabel_2.Position = [66 170 73 22];
             app.ControlTypeLabel_2.Text = 'Control Type';
+
+            % Create FluidTemperatureLabel_3
+            app.FluidTemperatureLabel_3 = uilabel(app.WellsProducerPanel);
+            app.FluidTemperatureLabel_3.HorizontalAlignment = 'right';
+            app.FluidTemperatureLabel_3.Position = [234 114 100 22];
+            app.FluidTemperatureLabel_3.Text = 'Top of Perforation';
+
+            % Create ProdWellTopOfPerforationEditField
+            app.ProdWellTopOfPerforationEditField = uieditfield(app.WellsProducerPanel, 'numeric');
+            app.ProdWellTopOfPerforationEditField.Limits = [1 Inf];
+            app.ProdWellTopOfPerforationEditField.RoundFractionalValues = 'on';
+            app.ProdWellTopOfPerforationEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellTopOfPerforationEditFieldValueChanged, true);
+            app.ProdWellTopOfPerforationEditField.Position = [349 114 61 22];
+            app.ProdWellTopOfPerforationEditField.Value = 1;
 
             % Create SimulationTab
             app.SimulationTab = uitab(app.GlobalTabGroup);

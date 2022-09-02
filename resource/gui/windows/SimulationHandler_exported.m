@@ -171,6 +171,7 @@ classdef SimulationHandler_exported < matlab.apps.AppBase
             app.MRSTReservoirAnalyzerButton.Enable = "off";
             app.MRSTWellDataPlotButton.Enable = "off";
             app.TimestepsTableButton.Enable = "off";
+            app.ClearResultsButton.Enable = "off";
         end
 
         function appendLogMessage(app, message)

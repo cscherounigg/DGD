@@ -57,6 +57,7 @@ classdef WellsWrapper
                 varNamedArgs.type = 'undefined'
                 varNamedArgs.temperature = 0;
                 varNamedArgs.color = 'b'
+                varNamedArgs.perforationTopDepth = 1;
             end
             
             if ~ismember(varNamedArgs.operatingCondition, {'bhp', 'rate'})
@@ -83,7 +84,8 @@ classdef WellsWrapper
             x = bottomHolePoint(1);
             y = bottomHolePoint(2);
             z = bottomHolePoint(3);
-            wells.wells = verticalWell(wells.wells, wells.grid.G, wells.rock.rock, x, y, 1:z, ...
+            wells.wells = verticalWell(wells.wells, wells.grid.G, wells.rock.rock, ...
+                x, y, varNamedArgs.perforationTopDepth:z, ...
                 'type', varNamedArgs.operatingCondition, 'val', ...
                 varNamedArgs.operatingValue, 'radius', radius, 'name', name, ...
                 'comp_i', [1, 0, 0], 'sign', sign);
