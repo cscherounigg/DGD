@@ -811,7 +811,9 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.updateRockTabVisibility();
             app.updateFluidTabVisibility();
             app.updateBCsTabVisibility();
+            app.updateReservoirTabVisibility();
             app.updateWellsTabVisibility();
+            app.updateSimulationTabVisibility();
         end
 
         % Task Tab
@@ -834,6 +836,16 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         % Rock Tab
         function updateRockTabVisibility(app)
+
+            % Update based on selection buttons
+            app.updateRockPorosityGlobalVisibility();
+            app.updateRockPermGlobalVisibility();
+            app.updateRockDensityGlobalVisibility();
+            app.updateRockCondGlobalVisibility();
+            app.updateRockHeatGlobalVisibility();
+            
+
+            % Update based on layer
             if app.GridLayerActiveCheckBox.Value
                 app.VisualizeLayerOnlyCheckBox.Enable = "on";
                 app.enableRockPorosityLayerInputs();
@@ -841,6 +853,11 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
                 app.enableRockDensityLayerInputs();
                 app.enableRockCondLayerInputs();
                 app.enableRockHeatLayerInputs();
+                app.updateRockPorosityLayerVisibility();
+                app.updateRockPermLayerVisibility();
+                app.updateRockDensityLayerVisibility();
+                app.updateRockCondLayerVisibility();
+                app.updateRockHeatLayerVisibility();
             else
                 app.VisualizeLayerOnlyCheckBox.Enable = "off";
                 app.disableRockPorosityLayerInputs();
@@ -857,6 +874,17 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
                 app.enableGravityInputs();
             else
                 app.disableGravityInputs();
+            end
+            if app.FluidEOSCheckBox.Value
+                app.FluidDensityEditField.Enable = "off";
+                app.FluidDensityUnitDropDown.Enable = "off";
+                app.FluidViscosityEditField.Enable = "off";
+                app.FluidViscosityUnitDropDown.Enable = "off";
+            else
+                app.FluidDensityEditField.Enable = "on";
+                app.FluidDensityUnitDropDown.Enable = "on";
+                app.FluidViscosityEditField.Enable = "on";
+                app.FluidViscosityUnitDropDown.Enable = "on";
             end
         end
 
@@ -894,6 +922,149 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             end   
         end
 
+        function enableBCsTemp(app)
+            app.BCxMinTempEditField.Enable = "on";
+            app.BCxMinTempUnitDropDown.Enable = "on";
+            app.BCxMaxTempEditField.Enable = "on";
+            app.BCxMaxTempUnitDropDown.Enable = "on";
+            app.BCyMinTempEditField.Enable = "on";
+            app.BCyMinTempUnitDropDown.Enable = "on";
+            app.BCyMaxTempEditField.Enable = "on";
+            app.BCyMaxTempUnitDropDown.Enable = "on";
+            app.BCzMinTempEditField.Enable = "on";
+            app.BCzMinTempUnitDropDown.Enable = "on";
+            app.BCzMaxTempEditField.Enable = "on";
+            app.BCzMaxTempUnitDropDown.Enable = "on";
+        end
+        function disableBCsTemp(app)
+            app.BCxMinTempEditField.Enable = "off";
+            app.BCxMinTempUnitDropDown.Enable = "off";
+            app.BCxMaxTempEditField.Enable = "off";
+            app.BCxMaxTempUnitDropDown.Enable = "off";
+            app.BCyMinTempEditField.Enable = "off";
+            app.BCyMinTempUnitDropDown.Enable = "off";
+            app.BCyMaxTempEditField.Enable = "off";
+            app.BCyMaxTempUnitDropDown.Enable = "off";
+            app.BCzMinTempEditField.Enable = "off";
+            app.BCzMinTempUnitDropDown.Enable = "off";
+            app.BCzMaxTempEditField.Enable = "off";
+            app.BCzMaxTempUnitDropDown.Enable = "off";
+        end
+        function enableBCsHeatFlux(app)
+            app.BCxMinHeatFluxEditField.Enable = "on";
+            app.BCxMinHeatFluxUnitDropDown.Enable = "on";
+            app.BCxMaxHeatFluxEditField.Enable = "on";
+            app.BCxMaxHeatFluxUnitDropDown.Enable = "on";
+            app.BCyMinHeatFluxEditField.Enable = "on";
+            app.BCyMinHeatFluxUnitDropDown.Enable = "on";
+            app.BCyMaxHeatFluxEditField.Enable = "on";
+            app.BCyMaxHeatFluxUnitDropDown.Enable = "on";
+            app.BCzMinHeatFluxEditField.Enable = "on";
+            app.BCzMinHeatFluxUnitDropDown.Enable = "on";
+            app.BCzMaxHeatFluxEditField.Enable = "on";
+            app.BCzMaxHeatFluxUnitDropDown.Enable = "on";
+        end
+        function disableBCsHeatFlux(app)
+            app.BCxMinHeatFluxEditField.Enable = "off";
+            app.BCxMinHeatFluxUnitDropDown.Enable = "off";
+            app.BCxMaxHeatFluxEditField.Enable = "off";
+            app.BCxMaxHeatFluxUnitDropDown.Enable = "off";
+            app.BCyMinHeatFluxEditField.Enable = "off";
+            app.BCyMinHeatFluxUnitDropDown.Enable = "off";
+            app.BCyMaxHeatFluxEditField.Enable = "off";
+            app.BCyMaxHeatFluxUnitDropDown.Enable = "off";
+            app.BCzMinHeatFluxEditField.Enable = "off";
+            app.BCzMinHeatFluxUnitDropDown.Enable = "off";
+            app.BCzMaxHeatFluxEditField.Enable = "off";
+            app.BCzMaxHeatFluxUnitDropDown.Enable = "off";
+        end
+
+        function updateBCsHydraulicVisibility(app)
+            switch app.BCxMinButtonGroup.SelectedObject
+                case app.BCxMinPressureButton
+                    app.BCxMinPressureEditField.Enable = "on";
+                    app.BCxMinPressureUnitDropDown.Enable = "on";
+                    app.BCxMinFluxEditField.Enable = "off";
+                    app.BCxMinFluxUnitDropDown.Enable = "off";
+                case app.BCxMinFluxButton
+                    app.BCxMinPressureEditField.Enable = "off";
+                    app.BCxMinPressureUnitDropDown.Enable = "off";
+                    app.BCxMinFluxEditField.Enable = "on";
+                    app.BCxMinFluxUnitDropDown.Enable = "on";
+            end
+            switch app.BCxMaxButtonGroup.SelectedObject
+                case app.BCxMaxPressureButton
+                    app.BCxMaxPressureEditField.Enable = "on";
+                    app.BCxMaxPressureUnitDropDown.Enable = "on";
+                    app.BCxMaxFluxEditField.Enable = "off";
+                    app.BCxMaxFluxUnitDropDown.Enable = "off";
+                case app.BCxMaxFluxButton
+                    app.BCxMaxPressureEditField.Enable = "off";
+                    app.BCxMaxPressureUnitDropDown.Enable = "off";
+                    app.BCxMaxFluxEditField.Enable = "on";
+                    app.BCxMaxFluxUnitDropDown.Enable = "on";
+            end
+            switch app.BCyMinButtonGroup.SelectedObject
+                case app.BCyMinPressureButton
+                    app.BCyMinPressureEditField.Enable = "on";
+                    app.BCyMinPressureUnitDropDown.Enable = "on";
+                    app.BCyMinFluxEditField.Enable = "off";
+                    app.BCyMinFluxUnitDropDown.Enable = "off";
+                case app.BCyMinFluxButton
+                    app.BCyMinPressureEditField.Enable = "off";
+                    app.BCyMinPressureUnitDropDown.Enable = "off";
+                    app.BCyMinFluxEditField.Enable = "on";
+                    app.BCyMinFluxUnitDropDown.Enable = "on";
+            end
+            switch app.BCyMaxButtonGroup.SelectedObject
+                case app.BCyMaxPressureButton
+                    app.BCyMaxPressureEditField.Enable = "on";
+                    app.BCyMaxPressureUnitDropDown.Enable = "on";
+                    app.BCyMaxFluxEditField.Enable = "off";
+                    app.BCyMaxFluxUnitDropDown.Enable = "off";
+                case app.BCyMaxFluxButton
+                    app.BCyMaxPressureEditField.Enable = "off";
+                    app.BCyMaxPressureUnitDropDown.Enable = "off";
+                    app.BCyMaxFluxEditField.Enable = "on";
+                    app.BCyMaxFluxUnitDropDown.Enable = "on";
+            end
+            switch app.BCzMinButtonGroup.SelectedObject
+                case app.BCzMinPressureButton
+                    app.BCzMinPressureEditField.Enable = "on";
+                    app.BCzMinPressureUnitDropDown.Enable = "on";
+                    app.BCzMinFluxEditField.Enable = "off";
+                    app.BCzMinFluxUnitDropDown.Enable = "off";
+                case app.BCzMinFluxButton
+                    app.BCzMinPressureEditField.Enable = "off";
+                    app.BCzMinPressureUnitDropDown.Enable = "off";
+                    app.BCzMinFluxEditField.Enable = "on";
+                    app.BCzMinFluxUnitDropDown.Enable = "on";
+            end
+            switch app.BCzMaxButtonGroup.SelectedObject
+                case app.BCzMaxPressureButton
+                    app.BCzMaxPressureEditField.Enable = "on";
+                    app.BCzMaxPressureUnitDropDown.Enable = "on";
+                    app.BCzMaxFluxEditField.Enable = "off";
+                    app.BCzMaxFluxUnitDropDown.Enable = "off";
+                case app.BCzMaxFluxButton
+                    app.BCzMaxPressureEditField.Enable = "off";
+                    app.BCzMaxPressureUnitDropDown.Enable = "off";
+                    app.BCzMaxFluxEditField.Enable = "on";
+                    app.BCzMaxFluxUnitDropDown.Enable = "on";
+            end
+        end
+        
+        % Reservoir Tab
+        function updateReservoirTabVisibility(app)
+            if app.InitializeWithEquilibriumCheckBox.Value
+                app.EqualizationTimeEditField.Enable = "on";
+                app.EqualizationTimeUnitDropDown.Enable = "on";            
+            else
+                app.EqualizationTimeEditField.Enable = "off";
+                app.EqualizationTimeUnitDropDown.Enable = "off";     
+            end
+        end
+
         % Wells Tab
         function updateWellsTabVisibility(app)
             switch app.InjWellControlButtonGroup.SelectedObject
@@ -914,6 +1085,16 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             end
         end
 
+        % Simulation Tab
+        function updateSimulationTabVisibility(app)
+            switch app.TimestepTypeButtonGroup.SelectedObject
+                case app.FixedTimestepsButton
+                    app.RampupStepsEditField.Enable = "off";
+                case app.GeometricRampupButton
+                    app.RampupStepsEditField.Enable = "on";
+            end
+        end
+        
         % Rock Layer properties
         function enableRockPorosityLayerInputs(app)
             app.LayerPorosityUniformButton.Enable = "on";
@@ -1033,6 +1214,246 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.LayerHeatGaussianMaxUnitDropDown.Enable = "off";
             app.LayerHeatGaussianStdEditField.Enable = "off";
         end
+        function updateRockPorosityGlobalVisibility(app)
+            switch app.GlobalPorosityButtonGroup.SelectedObject
+                case app.GlobalPorosityUniformButton
+                    app.GlobalPorosityEditField.Enable = "on";
+                    app.GlobalPorosityGaussianStdEditField.Enable = "off";
+                    app.GlobalPorosityGaussianMinEditField.Enable = "off";
+                    app.GlobalPorosityGaussianMaxEditField.Enable = "off";
+                case app.GlobalPorosityGaussianButton
+                    app.GlobalPorosityEditField.Enable = "off";
+                    app.GlobalPorosityGaussianStdEditField.Enable = "on";
+                    app.GlobalPorosityGaussianMinEditField.Enable = "on";
+                    app.GlobalPorosityGaussianMaxEditField.Enable = "on";
+            end
+        end
+        function updateRockPorosityLayerVisibility(app)
+            switch app.LayerPorosityButtonGroup.SelectedObject
+                case app.LayerPorosityUniformButton
+                    app.LayerPorosityEditField.Enable = "on";
+                    app.LayerPorosityGaussianStdEditField.Enable = "off";
+                    app.LayerPorosityGaussianMinEditField.Enable = "off";
+                    app.LayerPorosityGaussianMaxEditField.Enable = "off";
+                case app.LayerPorosityGaussianButton
+                    app.LayerPorosityEditField.Enable = "off";
+                    app.LayerPorosityGaussianStdEditField.Enable = "on";
+                    app.LayerPorosityGaussianMinEditField.Enable = "on";
+                    app.LayerPorosityGaussianMaxEditField.Enable = "on";
+            end
+        end
+        function updateRockPermGlobalVisibility(app)
+            switch app.GlobalPermButtonGroup.SelectedObject
+                case app.GlobalPermUniformButton
+                    app.GlobalPermEditField.Enable = "on";
+                    app.GlobalPermUnitDropDown.Enable = "on";
+                    app.GlobalPermGaussianStdEditField.Enable = "off";
+                    app.GlobalPermGaussianMinEditField.Enable = "off";
+                    app.GlobalPermGaussianMaxEditField.Enable = "off";
+                    app.GlobalPermGaussianMinUnitDropDown.Enable = "off";
+                    app.GlobalPermGaussianMaxUnitDropDown.Enable = "off";
+                    app.GlobalPermDirxEditField.Enable = "off";
+                    app.GlobalPermDiryEditField.Enable = "off";
+                    app.GlobalPermDirzEditField.Enable = "off";
+                    app.GlobalPermDirxUnitDropDown.Enable = "off";
+                    app.GlobalPermDiryUnitDropDown.Enable = "off";
+                    app.GlobalPermDirzUnitDropDown.Enable = "off";
+                case app.GlobalPermGaussianButton
+                    app.GlobalPermEditField.Enable = "off";
+                    app.GlobalPermUnitDropDown.Enable = "off";
+                    app.GlobalPermGaussianStdEditField.Enable = "on";
+                    app.GlobalPermGaussianMinEditField.Enable = "on";
+                    app.GlobalPermGaussianMaxEditField.Enable = "on";
+                    app.GlobalPermGaussianMinUnitDropDown.Enable = "on";
+                    app.GlobalPermGaussianMaxUnitDropDown.Enable = "on";
+                    app.GlobalPermDirxEditField.Enable = "off";
+                    app.GlobalPermDiryEditField.Enable = "off";
+                    app.GlobalPermDirzEditField.Enable = "off";
+                    app.GlobalPermDirxUnitDropDown.Enable = "off";
+                    app.GlobalPermDiryUnitDropDown.Enable = "off";
+                    app.GlobalPermDirzUnitDropDown.Enable = "off";
+                case app.GlobalPermDirectionalButton
+                    app.GlobalPermEditField.Enable = "off";
+                    app.GlobalPermUnitDropDown.Enable = "off";
+                    app.GlobalPermGaussianStdEditField.Enable = "off";
+                    app.GlobalPermGaussianMinEditField.Enable = "off";
+                    app.GlobalPermGaussianMaxEditField.Enable = "off";
+                    app.GlobalPermGaussianMinUnitDropDown.Enable = "off";
+                    app.GlobalPermGaussianMaxUnitDropDown.Enable = "off";
+                    app.GlobalPermDirxEditField.Enable = "on";
+                    app.GlobalPermDiryEditField.Enable = "on";
+                    app.GlobalPermDirzEditField.Enable = "on";
+                    app.GlobalPermDirxUnitDropDown.Enable = "on";
+                    app.GlobalPermDiryUnitDropDown.Enable = "on";
+                    app.GlobalPermDirzUnitDropDown.Enable = "on";
+            end
+        end
+        function updateRockPermLayerVisibility(app)
+            switch app.LayerPermButtonGroup.SelectedObject
+                case app.LayerPermUniformButton
+                    app.LayerPermEditField.Enable = "on";
+                    app.LayerPermUnitDropDown.Enable = "on";
+                    app.LayerPermGaussianStdEditField.Enable = "off";
+                    app.LayerPermGaussianMinEditField.Enable = "off";
+                    app.LayerPermGaussianMaxEditField.Enable = "off";
+                    app.LayerPermGaussianMinUnitDropDown.Enable = "off";
+                    app.LayerPermGaussianMaxUnitDropDown.Enable = "off";
+                    app.LayerPermDirxEditField.Enable = "off";
+                    app.LayerPermDiryEditField.Enable = "off";
+                    app.LayerPermDirzEditField.Enable = "off";
+                    app.LayerPermDirxUnitDropDown.Enable = "off";
+                    app.LayerPermDiryUnitDropDown.Enable = "off";
+                    app.LayerPermDirzUnitDropDown.Enable = "off";
+                case app.LayerPermGaussianButton
+                    app.LayerPermEditField.Enable = "off";
+                    app.LayerPermUnitDropDown.Enable = "off";
+                    app.LayerPermGaussianStdEditField.Enable = "on";
+                    app.LayerPermGaussianMinEditField.Enable = "on";
+                    app.LayerPermGaussianMaxEditField.Enable = "on";
+                    app.LayerPermGaussianMinUnitDropDown.Enable = "on";
+                    app.LayerPermGaussianMaxUnitDropDown.Enable = "on";
+                    app.LayerPermDirxEditField.Enable = "off";
+                    app.LayerPermDiryEditField.Enable = "off";
+                    app.LayerPermDirzEditField.Enable = "off";
+                    app.LayerPermDirxUnitDropDown.Enable = "off";
+                    app.LayerPermDiryUnitDropDown.Enable = "off";
+                    app.LayerPermDirzUnitDropDown.Enable = "off";
+                case app.LayerPermDirectionalButton
+                    app.LayerPermEditField.Enable = "off";
+                    app.LayerPermUnitDropDown.Enable = "off";
+                    app.LayerPermGaussianStdEditField.Enable = "off";
+                    app.LayerPermGaussianMinEditField.Enable = "off";
+                    app.LayerPermGaussianMaxEditField.Enable = "off";
+                    app.LayerPermGaussianMinUnitDropDown.Enable = "off";
+                    app.LayerPermGaussianMaxUnitDropDown.Enable = "off";
+                    app.LayerPermDirxEditField.Enable = "on";
+                    app.LayerPermDiryEditField.Enable = "on";
+                    app.LayerPermDirzEditField.Enable = "on";
+                    app.LayerPermDirxUnitDropDown.Enable = "on";
+                    app.LayerPermDiryUnitDropDown.Enable = "on";
+                    app.LayerPermDirzUnitDropDown.Enable = "on";
+            end
+        end
+        function updateRockDensityGlobalVisibility(app)
+            switch app.GlobalDensityButtonGroup.SelectedObject
+                case app.GlobalDensityUniformButton
+                    app.GlobalDensityEditField.Enable = "on";
+                    app.GlobalDensityUnitDropDown.Enable = "on";
+                    app.GlobalDensityGaussianStdEditField.Enable = "off";
+                    app.GlobalDensityGaussianMinEditField.Enable = "off";
+                    app.GlobalDensityGaussianMaxEditField.Enable = "off";
+                    app.GlobalDensityGaussianMinUnitDropDown.Enable = "off";
+                    app.GlobalDensityGaussianMaxUnitDropDown.Enable = "off";
+                case app.GlobalDensityGaussianButton
+                    app.GlobalDensityEditField.Enable = "off";
+                    app.GlobalDensityUnitDropDown.Enable = "off";
+                    app.GlobalDensityGaussianStdEditField.Enable = "on";
+                    app.GlobalDensityGaussianMinEditField.Enable = "on";
+                    app.GlobalDensityGaussianMaxEditField.Enable = "on";
+                    app.GlobalDensityGaussianMinUnitDropDown.Enable = "on";
+                    app.GlobalDensityGaussianMaxUnitDropDown.Enable = "on";
+            end
+        end
+        function updateRockDensityLayerVisibility(app)
+            switch app.LayerDensityButtonGroup.SelectedObject
+                case app.LayerDensityUniformButton
+                    app.LayerDensityEditField.Enable = "on";
+                    app.LayerDensityUnitDropDown.Enable = "on";
+                    app.LayerDensityGaussianStdEditField.Enable = "off";
+                    app.LayerDensityGaussianMinEditField.Enable = "off";
+                    app.LayerDensityGaussianMaxEditField.Enable = "off";
+                    app.LayerDensityGaussianMinUnitDropDown.Enable = "off";
+                    app.LayerDensityGaussianMaxUnitDropDown.Enable = "off";
+                case app.LayerDensityGaussianButton
+                    app.LayerDensityEditField.Enable = "off";
+                    app.LayerDensityUnitDropDown.Enable = "off";
+                    app.LayerDensityGaussianStdEditField.Enable = "on";
+                    app.LayerDensityGaussianMinEditField.Enable = "on";
+                    app.LayerDensityGaussianMaxEditField.Enable = "on";
+                    app.LayerDensityGaussianMinUnitDropDown.Enable = "on";
+                    app.LayerDensityGaussianMaxUnitDropDown.Enable = "on";
+            end
+        end
+        function updateRockCondGlobalVisibility(app)
+            switch app.GlobalCondButtonGroup.SelectedObject
+                case app.GlobalCondUniformButton
+                    app.GlobalCondEditField.Enable = "on";
+                    app.GlobalCondUnitDropDown.Enable = "on";
+                    app.GlobalCondGaussianStdEditField.Enable = "off";
+                    app.GlobalCondGaussianMinEditField.Enable = "off";
+                    app.GlobalCondGaussianMaxEditField.Enable = "off";
+                    app.GlobalCondGaussianMinUnitDropDown.Enable = "off";
+                    app.GlobalCondGaussianMaxUnitDropDown.Enable = "off";
+                case app.GlobalCondGaussianButton
+                    app.GlobalCondEditField.Enable = "off";
+                    app.GlobalCondUnitDropDown.Enable = "off";
+                    app.GlobalCondGaussianStdEditField.Enable = "on";
+                    app.GlobalCondGaussianMinEditField.Enable = "on";
+                    app.GlobalCondGaussianMaxEditField.Enable = "on";
+                    app.GlobalCondGaussianMinUnitDropDown.Enable = "on";
+                    app.GlobalCondGaussianMaxUnitDropDown.Enable = "on";
+            end
+        end
+        function updateRockCondLayerVisibility(app)
+            switch app.LayerCondButtonGroup.SelectedObject
+                case app.LayerCondUniformButton
+                    app.LayerCondEditField.Enable = "on";
+                    app.LayerCondUnitDropDown.Enable = "on";
+                    app.LayerCondGaussianStdEditField.Enable = "off";
+                    app.LayerCondGaussianMinEditField.Enable = "off";
+                    app.LayerCondGaussianMaxEditField.Enable = "off";
+                    app.LayerCondGaussianMinUnitDropDown.Enable = "off";
+                    app.LayerCondGaussianMaxUnitDropDown.Enable = "off";
+                case app.LayerCondGaussianButton
+                    app.LayerCondEditField.Enable = "off";
+                    app.LayerCondUnitDropDown.Enable = "off";
+                    app.LayerCondGaussianStdEditField.Enable = "on";
+                    app.LayerCondGaussianMinEditField.Enable = "on";
+                    app.LayerCondGaussianMaxEditField.Enable = "on";
+                    app.LayerCondGaussianMinUnitDropDown.Enable = "on";
+                    app.LayerCondGaussianMaxUnitDropDown.Enable = "on";
+            end
+        end
+        function updateRockHeatGlobalVisibility(app)
+            switch app.GlobalHeatButtonGroup.SelectedObject
+                case app.GlobalHeatUniformButton
+                    app.GlobalHeatEditField.Enable = "on";
+                    app.GlobalHeatUnitDropDown.Enable = "on";
+                    app.GlobalHeatGaussianStdEditField.Enable = "off";
+                    app.GlobalHeatGaussianMinEditField.Enable = "off";
+                    app.GlobalHeatGaussianMaxEditField.Enable = "off";
+                    app.GlobalHeatGaussianMinUnitDropDown.Enable = "off";
+                    app.GlobalHeatGaussianMaxUnitDropDown.Enable = "off";
+                case app.GlobalHeatGaussianButton
+                    app.GlobalHeatEditField.Enable = "off";
+                    app.GlobalHeatUnitDropDown.Enable = "off";
+                    app.GlobalHeatGaussianStdEditField.Enable = "on";
+                    app.GlobalHeatGaussianMinEditField.Enable = "on";
+                    app.GlobalHeatGaussianMaxEditField.Enable = "on";
+                    app.GlobalHeatGaussianMinUnitDropDown.Enable = "on";
+                    app.GlobalHeatGaussianMaxUnitDropDown.Enable = "on";
+            end
+        end
+        function updateRockHeatLayerVisibility(app)
+            switch app.LayerHeatButtonGroup.SelectedObject
+                case app.LayerHeatUniformButton
+                    app.LayerHeatEditField.Enable = "on";
+                    app.LayerHeatUnitDropDown.Enable = "on";
+                    app.LayerHeatGaussianStdEditField.Enable = "off";
+                    app.LayerHeatGaussianMinEditField.Enable = "off";
+                    app.LayerHeatGaussianMaxEditField.Enable = "off";
+                    app.LayerHeatGaussianMinUnitDropDown.Enable = "off";
+                    app.LayerHeatGaussianMaxUnitDropDown.Enable = "off";
+                case app.LayerHeatGaussianButton
+                    app.LayerHeatEditField.Enable = "off";
+                    app.LayerHeatUnitDropDown.Enable = "off";
+                    app.LayerHeatGaussianStdEditField.Enable = "on";
+                    app.LayerHeatGaussianMinEditField.Enable = "on";
+                    app.LayerHeatGaussianMaxEditField.Enable = "on";
+                    app.LayerHeatGaussianMinUnitDropDown.Enable = "on";
+                    app.LayerHeatGaussianMaxUnitDropDown.Enable = "on";
+            end
+        end
 
         % Gravity properties
         function enableGravityInputs(app)
@@ -1101,18 +1522,38 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         
         % BCs
         function enablexMinBCInputs(app)
-            app.BCxMinPressureButton.Enable = true;
-            app.BCxMinPressureEditField.Enable = true;
-            app.BCxMinPressureUnitDropDown.Enable = true;
-            app.BCxMinFluxButton.Enable = true;
-            app.BCxMinFluxEditField.Enable = true;
-            app.BCxMinFluxUnitDropDown.Enable = true;
-            app.BCxMinTempLabel.Enable = true;
-            app.BCxMinTempEditField.Enable = true;
-            app.BCxMinTempUnitDropDown.Enable = true;
-            app.BCxMinHeatFluxLabel.Enable = true;
-            app.BCxMinHeatFluxEditField.Enable = true;
-            app.BCxMinHeatFluxUnitDropDown.Enable = true;
+            % Thermal
+            switch app.BCThermalButtonGroup.SelectedObject
+                case app.BCThermalTempButton
+                    app.BCxMinTempLabel.Enable = "on";
+                    app.BCxMinTempEditField.Enable = "on";
+                    app.BCxMinTempUnitDropDown.Enable = "on";
+                    app.BCxMinHeatFluxLabel.Enable = "off";
+                    app.BCxMinHeatFluxEditField.Enable = "off";
+                    app.BCxMinHeatFluxUnitDropDown.Enable = "off";
+                case app.BCThermalHeatFluxButton
+                    app.BCxMinTempLabel.Enable = "off";
+                    app.BCxMinTempEditField.Enable = "off";
+                    app.BCxMinTempUnitDropDown.Enable = "off";
+                    app.BCxMinHeatFluxLabel.Enable = "on";
+                    app.BCxMinHeatFluxEditField.Enable = "on";
+                    app.BCxMinHeatFluxUnitDropDown.Enable = "on";
+            end
+            % Hydraulic
+            app.BCxMinPressureButton.Enable = "on";
+            app.BCxMinFluxButton.Enable = "on";
+            switch app.BCxMinButtonGroup.SelectedObject
+                case app.BCxMinPressureButton
+                    app.BCxMinPressureEditField.Enable = "on";
+                    app.BCxMinPressureUnitDropDown.Enable = "on";
+                    app.BCxMinFluxEditField.Enable = "off";
+                    app.BCxMinFluxUnitDropDown.Enable = "off";
+                case app.BCxMinFluxButton
+                    app.BCxMinPressureEditField.Enable = "off";
+                    app.BCxMinPressureUnitDropDown.Enable = "off";
+                    app.BCxMinFluxEditField.Enable = "on";
+                    app.BCxMinFluxUnitDropDown.Enable = "on";
+            end
         end
         function disablexMinBCInputs(app)
             app.BCxMinPressureButton.Enable = false;
@@ -1129,18 +1570,38 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.BCxMinHeatFluxUnitDropDown.Enable = false;
         end
         function enablexMaxBCInputs(app)
-            app.BCxMaxPressureButton.Enable = true;
-            app.BCxMaxPressureEditField.Enable = true;
-            app.BCxMaxPressureUnitDropDown.Enable = true;
-            app.BCxMaxFluxButton.Enable = true;
-            app.BCxMaxFluxEditField.Enable = true;
-            app.BCxMaxFluxUnitDropDown.Enable = true;
-            app.BCxMaxTempLabel.Enable = true;
-            app.BCxMaxTempEditField.Enable = true;
-            app.BCxMaxTempUnitDropDown.Enable = true;
-            app.BCxMaxHeatFluxLabel.Enable = true;
-            app.BCxMaxHeatFluxEditField.Enable = true;
-            app.BCxMaxHeatFluxUnitDropDown.Enable = true;
+            % Thermal
+            switch app.BCThermalButtonGroup.SelectedObject
+                case app.BCThermalTempButton
+                    app.BCxMaxTempLabel.Enable = "on";
+                    app.BCxMaxTempEditField.Enable = "on";
+                    app.BCxMaxTempUnitDropDown.Enable = "on";
+                    app.BCxMaxHeatFluxLabel.Enable = "off";
+                    app.BCxMaxHeatFluxEditField.Enable = "off";
+                    app.BCxMaxHeatFluxUnitDropDown.Enable = "off";
+                case app.BCThermalHeatFluxButton
+                    app.BCxMaxTempLabel.Enable = "off";
+                    app.BCxMaxTempEditField.Enable = "off";
+                    app.BCxMaxTempUnitDropDown.Enable = "off";
+                    app.BCxMaxHeatFluxLabel.Enable = "on";
+                    app.BCxMaxHeatFluxEditField.Enable = "on";
+                    app.BCxMaxHeatFluxUnitDropDown.Enable = "on";
+            end
+            % Hydraulic
+            app.BCxMaxPressureButton.Enable = "on";
+            app.BCxMaxFluxButton.Enable = "on";
+            switch app.BCxMaxButtonGroup.SelectedObject
+                case app.BCxMaxPressureButton
+                    app.BCxMaxPressureEditField.Enable = "on";
+                    app.BCxMaxPressureUnitDropDown.Enable = "on";
+                    app.BCxMaxFluxEditField.Enable = "off";
+                    app.BCxMaxFluxUnitDropDown.Enable = "off";
+                case app.BCxMaxFluxButton
+                    app.BCxMaxPressureEditField.Enable = "off";
+                    app.BCxMaxPressureUnitDropDown.Enable = "off";
+                    app.BCxMaxFluxEditField.Enable = "on";
+                    app.BCxMaxFluxUnitDropDown.Enable = "on";
+            end
         end
         function disablexMaxBCInputs(app)
             app.BCxMaxPressureButton.Enable = false;
@@ -1157,18 +1618,38 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.BCxMaxHeatFluxUnitDropDown.Enable = false;
         end
         function enableyMinBCInputs(app)
-            app.BCyMinPressureButton.Enable = true;
-            app.BCyMinPressureEditField.Enable = true;
-            app.BCyMinPressureUnitDropDown.Enable = true;
-            app.BCyMinFluxButton.Enable = true;
-            app.BCyMinFluxEditField.Enable = true;
-            app.BCyMinFluxUnitDropDown.Enable = true;
-            app.BCyMinTempLabel.Enable = true;
-            app.BCyMinTempEditField.Enable = true;
-            app.BCyMinTempUnitDropDown.Enable = true;
-            app.BCyMinHeatFluxLabel.Enable = true;
-            app.BCyMinHeatFluxEditField.Enable = true;
-            app.BCyMinHeatFluxUnitDropDown.Enable = true;
+            % Thermal
+            switch app.BCThermalButtonGroup.SelectedObject
+                case app.BCThermalTempButton
+                    app.BCyMinTempLabel.Enable = "on";
+                    app.BCyMinTempEditField.Enable = "on";
+                    app.BCyMinTempUnitDropDown.Enable = "on";
+                    app.BCyMinHeatFluxLabel.Enable = "off";
+                    app.BCyMinHeatFluxEditField.Enable = "off";
+                    app.BCyMinHeatFluxUnitDropDown.Enable = "off";
+                case app.BCThermalHeatFluxButton
+                    app.BCyMinTempLabel.Enable = "off";
+                    app.BCyMinTempEditField.Enable = "off";
+                    app.BCyMinTempUnitDropDown.Enable = "off";
+                    app.BCyMinHeatFluxLabel.Enable = "on";
+                    app.BCyMinHeatFluxEditField.Enable = "on";
+                    app.BCyMinHeatFluxUnitDropDown.Enable = "on";
+            end
+            % Hydraulic
+            app.BCyMinPressureButton.Enable = "on";
+            app.BCyMinFluxButton.Enable = "on";
+            switch app.BCyMinButtonGroup.SelectedObject
+                case app.BCyMinPressureButton
+                    app.BCyMinPressureEditField.Enable = "on";
+                    app.BCyMinPressureUnitDropDown.Enable = "on";
+                    app.BCyMinFluxEditField.Enable = "off";
+                    app.BCyMinFluxUnitDropDown.Enable = "off";
+                case app.BCyMinFluxButton
+                    app.BCyMinPressureEditField.Enable = "off";
+                    app.BCyMinPressureUnitDropDown.Enable = "off";
+                    app.BCyMinFluxEditField.Enable = "on";
+                    app.BCyMinFluxUnitDropDown.Enable = "on";
+            end
         end
         function disableyMinBCInputs(app)
             app.BCyMinPressureButton.Enable = false;
@@ -1185,18 +1666,38 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.BCyMinHeatFluxUnitDropDown.Enable = false;
         end
         function enableyMaxBCInputs(app)
-            app.BCyMaxPressureButton.Enable = true;
-            app.BCyMaxPressureEditField.Enable = true;
-            app.BCyMaxPressureUnitDropDown.Enable = true;
-            app.BCyMaxFluxButton.Enable = true;
-            app.BCyMaxFluxEditField.Enable = true;
-            app.BCyMaxFluxUnitDropDown.Enable = true;
-            app.BCyMaxTempLabel.Enable = true;
-            app.BCyMaxTempEditField.Enable = true;
-            app.BCyMaxTempUnitDropDown.Enable = true;
-            app.BCyMaxHeatFluxLabel.Enable = true;
-            app.BCyMaxHeatFluxEditField.Enable = true;
-            app.BCyMaxHeatFluxUnitDropDown.Enable = true;
+            % Thermal
+            switch app.BCThermalButtonGroup.SelectedObject
+                case app.BCThermalTempButton
+                    app.BCyMaxTempLabel.Enable = "on";
+                    app.BCyMaxTempEditField.Enable = "on";
+                    app.BCyMaxTempUnitDropDown.Enable = "on";
+                    app.BCyMaxHeatFluxLabel.Enable = "off";
+                    app.BCyMaxHeatFluxEditField.Enable = "off";
+                    app.BCyMaxHeatFluxUnitDropDown.Enable = "off";
+                case app.BCThermalHeatFluxButton
+                    app.BCyMaxTempLabel.Enable = "off";
+                    app.BCyMaxTempEditField.Enable = "off";
+                    app.BCyMaxTempUnitDropDown.Enable = "off";
+                    app.BCyMaxHeatFluxLabel.Enable = "on";
+                    app.BCyMaxHeatFluxEditField.Enable = "on";
+                    app.BCyMaxHeatFluxUnitDropDown.Enable = "on";
+            end
+            % Hydraulic
+            app.BCyMaxPressureButton.Enable = "on";
+            app.BCyMaxFluxButton.Enable = "on";
+            switch app.BCyMaxButtonGroup.SelectedObject
+                case app.BCyMaxPressureButton
+                    app.BCyMaxPressureEditField.Enable = "on";
+                    app.BCyMaxPressureUnitDropDown.Enable = "on";
+                    app.BCyMaxFluxEditField.Enable = "off";
+                    app.BCyMaxFluxUnitDropDown.Enable = "off";
+                case app.BCyMaxFluxButton
+                    app.BCyMaxPressureEditField.Enable = "off";
+                    app.BCyMaxPressureUnitDropDown.Enable = "off";
+                    app.BCyMaxFluxEditField.Enable = "on";
+                    app.BCyMaxFluxUnitDropDown.Enable = "on";
+            end
         end
         function disableyMaxBCInputs(app)
             app.BCyMaxPressureButton.Enable = false;
@@ -1213,18 +1714,38 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.BCyMaxHeatFluxUnitDropDown.Enable = false;
         end
         function enablezMinBCInputs(app)
-            app.BCzMinPressureButton.Enable = true;
-            app.BCzMinPressureEditField.Enable = true;
-            app.BCzMinPressureUnitDropDown.Enable = true;
-            app.BCzMinFluxButton.Enable = true;
-            app.BCzMinFluxEditField.Enable = true;
-            app.BCzMinFluxUnitDropDown.Enable = true;
-            app.BCzMinTempLabel.Enable = true;
-            app.BCzMinTempEditField.Enable = true;
-            app.BCzMinTempUnitDropDown.Enable = true;
-            app.BCzMinHeatFluxLabel.Enable = true;
-            app.BCzMinHeatFluxEditField.Enable = true;
-            app.BCzMinHeatFluxUnitDropDown.Enable = true;
+            % Thermal
+            switch app.BCThermalButtonGroup.SelectedObject
+                case app.BCThermalTempButton
+                    app.BCzMinTempLabel.Enable = "on";
+                    app.BCzMinTempEditField.Enable = "on";
+                    app.BCzMinTempUnitDropDown.Enable = "on";
+                    app.BCzMinHeatFluxLabel.Enable = "off";
+                    app.BCzMinHeatFluxEditField.Enable = "off";
+                    app.BCzMinHeatFluxUnitDropDown.Enable = "off";
+                case app.BCThermalHeatFluxButton
+                    app.BCzMinTempLabel.Enable = "off";
+                    app.BCzMinTempEditField.Enable = "off";
+                    app.BCzMinTempUnitDropDown.Enable = "off";
+                    app.BCzMinHeatFluxLabel.Enable = "on";
+                    app.BCzMinHeatFluxEditField.Enable = "on";
+                    app.BCzMinHeatFluxUnitDropDown.Enable = "on";
+            end
+            % Hydraulic
+            app.BCzMinPressureButton.Enable = "on";
+            app.BCzMinFluxButton.Enable = "on";
+            switch app.BCzMinButtonGroup.SelectedObject
+                case app.BCzMinPressureButton
+                    app.BCzMinPressureEditField.Enable = "on";
+                    app.BCzMinPressureUnitDropDown.Enable = "on";
+                    app.BCzMinFluxEditField.Enable = "off";
+                    app.BCzMinFluxUnitDropDown.Enable = "off";
+                case app.BCzMinFluxButton
+                    app.BCzMinPressureEditField.Enable = "off";
+                    app.BCzMinPressureUnitDropDown.Enable = "off";
+                    app.BCzMinFluxEditField.Enable = "on";
+                    app.BCzMinFluxUnitDropDown.Enable = "on";
+            end
         end
         function disablezMinBCInputs(app)
             app.BCzMinPressureButton.Enable = false;
@@ -1241,18 +1762,38 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             app.BCzMinHeatFluxUnitDropDown.Enable = false;
         end
         function enablezMaxBCInputs(app)
-            app.BCzMaxPressureButton.Enable = true;
-            app.BCzMaxPressureEditField.Enable = true;
-            app.BCzMaxPressureUnitDropDown.Enable = true;
-            app.BCzMaxFluxButton.Enable = true;
-            app.BCzMaxFluxEditField.Enable = true;
-            app.BCzMaxFluxUnitDropDown.Enable = true;
-            app.BCzMaxTempLabel.Enable = true;
-            app.BCzMaxTempEditField.Enable = true;
-            app.BCzMaxTempUnitDropDown.Enable = true;
-            app.BCzMaxHeatFluxLabel.Enable = true;
-            app.BCzMaxHeatFluxEditField.Enable = true;
-            app.BCzMaxHeatFluxUnitDropDown.Enable = true;
+            % Thermal
+            switch app.BCThermalButtonGroup.SelectedObject
+                case app.BCThermalTempButton
+                    app.BCzMaxTempLabel.Enable = "on";
+                    app.BCzMaxTempEditField.Enable = "on";
+                    app.BCzMaxTempUnitDropDown.Enable = "on";
+                    app.BCzMaxHeatFluxLabel.Enable = "off";
+                    app.BCzMaxHeatFluxEditField.Enable = "off";
+                    app.BCzMaxHeatFluxUnitDropDown.Enable = "off";
+                case app.BCThermalHeatFluxButton
+                    app.BCzMaxTempLabel.Enable = "off";
+                    app.BCzMaxTempEditField.Enable = "off";
+                    app.BCzMaxTempUnitDropDown.Enable = "off";
+                    app.BCzMaxHeatFluxLabel.Enable = "on";
+                    app.BCzMaxHeatFluxEditField.Enable = "on";
+                    app.BCzMaxHeatFluxUnitDropDown.Enable = "on";
+            end
+            % Hydraulic
+            app.BCzMaxPressureButton.Enable = "on";
+            app.BCzMaxFluxButton.Enable = "on";
+            switch app.BCzMaxButtonGroup.SelectedObject
+                case app.BCzMaxPressureButton
+                    app.BCzMaxPressureEditField.Enable = "on";
+                    app.BCzMaxPressureUnitDropDown.Enable = "on";
+                    app.BCzMaxFluxEditField.Enable = "off";
+                    app.BCzMaxFluxUnitDropDown.Enable = "off";
+                case app.BCzMaxFluxButton
+                    app.BCzMaxPressureEditField.Enable = "off";
+                    app.BCzMaxPressureUnitDropDown.Enable = "off";
+                    app.BCzMaxFluxEditField.Enable = "on";
+                    app.BCzMaxFluxUnitDropDown.Enable = "on";
+            end
         end
         function disablezMaxBCInputs(app)
             app.BCzMaxPressureButton.Enable = false;
@@ -1273,14 +1814,38 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%                  GUI Input Control Methods                  %%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Methods controlling the use of intrinsic element user input
-        % limitations (e.g. max/min values).
+        % Methods controlling the user input limitations (e.g. max/min values).
 
-        function updateGridLayerLimits(app)
-            app.GridLayerThicknessEditField.Limits = [1 app.GridNzEditField.Value];
-            app.GridLayerPlanePointxEditField.Limits = [0 app.GridNxEditField.Value];
-            app.GridLayerPlanePointyEditField.Limits = [0 app.GridNyEditField.Value];
-            app.GridLayerPlanePointzEditField.Limits = [0 app.GridNzEditField.Value];
+        function updateTemperatureMinLimit(app, tempField, unitField)
+            minKelvin = 0; % K
+            unit = unitField.Value;
+            minInUnit = kelvin2temperature(minKelvin, unit);
+            if tempField.Value < minInUnit + 1
+                tempField.Value = minInUnit + 1;
+            end
+            tempField.Limits = [minInUnit tempField.Limits(2)];
+        end
+
+        function updateInjectionWellPositionLimits(app)
+            currentPos = app.getInjWellBottomPoint();
+            gridDims = app.getGridDimsVector();
+            if any(currentPos > gridDims)
+                app.setInjWellBottomPoint([1 1 1]);
+            end
+            app.InjWellPointxEditField.Limits = [1 gridDims(1)];
+            app.InjWellPointyEditField.Limits = [1 gridDims(2)];
+            app.InjWellPointzEditField.Limits = [1 gridDims(3)];
+        end
+
+        function updateProductionWellPositionLimits(app)
+            currentPos = app.getProdWellBottomPoint();
+            gridDims = app.getGridDimsVector();
+            if any(currentPos > gridDims)
+                app.setProdWellBottomPoint([1 1 1]);
+            end
+            app.ProdWellPointxEditField.Limits = [1 gridDims(1)];
+            app.ProdWellPointyEditField.Limits = [1 gridDims(2)];
+            app.ProdWellPointzEditField.Limits = [1 gridDims(3)];
         end
 
         
@@ -2078,6 +2643,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         function updateRock(app)
             app.updateTaskParams();
+            app.updateRockTabVisibility();
             if ~app.PreviewCheckBox.Value
                 return
             end
@@ -2249,19 +2815,22 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         % Value changed function: GridNxEditField
         function GridNxEditFieldValueChanged(app, event)
-            app.updateGridLayerLimits();
+            app.updateInjectionWellPositionLimits();
+            app.updateProductionWellPositionLimits();
             app.updateGrid();
         end
 
         % Value changed function: GridNyEditField
         function GridNyEditFieldValueChanged(app, event)
-            app.updateGridLayerLimits();
+            app.updateInjectionWellPositionLimits();
+            app.updateProductionWellPositionLimits();
             app.updateGrid();
         end
 
         % Value changed function: GridNzEditField
         function GridNzEditFieldValueChanged(app, event)
-            app.updateGridLayerLimits();
+            app.updateInjectionWellPositionLimits();
+            app.updateProductionWellPositionLimits();
             app.updateGrid();
         end
 
@@ -2608,66 +3177,49 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         % Selection changed function: BCxMinButtonGroup
         function BCxMinButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
         % Selection changed function: BCxMaxButtonGroup
         function BCxMaxButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
         % Selection changed function: BCyMinButtonGroup
         function BCyMinButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
         % Selection changed function: BCyMaxButtonGroup
         function BCyMaxButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
         % Selection changed function: BCzMinButtonGroup
         function BCzMinButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
         % Selection changed function: BCzMaxButtonGroup
         function BCzMaxButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
         % Callback function
         function BCThermButtonGroupSelectionChanged(app, event)
-            app.updateBCs();
-        end
-
-        % Callback function
-        function BCxMaxThermButtonGroupSelectionChanged(app, event)
-            app.updateBCs();
-        end
-
-        % Callback function
-        function BCyMinThermButtonGroupSelectionChanged(app, event)
-            app.updateBCs();
-        end
-
-        % Callback function
-        function BCyMaxThermButtonGroupSelectionChanged(app, event)
-            app.updateBCs();
-        end
-
-        % Callback function
-        function BCzMinThermButtonGroupSelectionChanged(app, event)
-            app.updateBCs();
-        end
-
-        % Callback function
-        function BCzMaxThermButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
         % Selection changed function: BCThermalButtonGroup
         function BCThermalButtonGroupSelectionChanged(app, event)
+            app.updateBCsTabVisibility();
             app.updateBCs();
         end
 
@@ -2994,17 +3546,74 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
         % Value changed function: FluidEOSCheckBox
         function FluidEOSCheckBoxValueChanged(app, event)
+            app.updateFluidTabVisibility();
             app.updateFluid();     
         end
 
         % Value changed function: InitializeWithEquilibriumCheckBox
         function InitializeWithEquilibriumCheckBoxValueChanged(app, event)
+            app.updateReservoirTabVisibility();
             app.updateReservoir();
         end
 
         % Value changed function: TaskKeepExistingCheckBox
         function TaskKeepExistingCheckBoxValueChanged(app, event)
             app.updateWarningsPanel();
+        end
+
+        % Selection changed function: TimestepTypeButtonGroup
+        function TimestepTypeButtonGroupSelectionChanged(app, event)
+            app.updateSimulationTabVisibility();
+        end
+
+        % Value changed function: InjWellTempUnitDropDown
+        function InjWellTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.InjWellTempEditField, app.InjWellTempUnitDropDown);
+        end
+
+        % Value changed function: BCxMinTempUnitDropDown
+        function BCxMinTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.BCxMinTempEditField, app.BCxMinTempUnitDropDown);
+        end
+
+        % Value changed function: BCxMaxTempUnitDropDown
+        function BCxMaxTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.BCxMaxTempEditField, app.BCxMaxTempUnitDropDown);
+        end
+
+        % Value changed function: BCyMinTempUnitDropDown
+        function BCyMinTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.BCyMinTempEditField, app.BCyMinTempUnitDropDown);
+        end
+
+        % Value changed function: BCyMaxTempUnitDropDown
+        function BCyMaxTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.BCyMaxTempEditField, app.BCyMaxTempUnitDropDown);
+        end
+
+        % Value changed function: BCzMinTempUnitDropDown
+        function BCzMinTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.BCzMinTempEditField, app.BCzMinTempUnitDropDown);
+        end
+
+        % Value changed function: BCzMaxTempUnitDropDown
+        function BCzMaxTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.BCzMaxTempEditField, app.BCzMaxTempUnitDropDown);
+        end
+
+        % Value changed function: ReservoirInitTempUnitDropDown
+        function ReservoirInitTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.ReservoirInitTempEditField, app.ReservoirInitTempUnitDropDown);
+        end
+
+        % Value changed function: MinReservoirTempUnitDropDown
+        function MinReservoirTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.MinReservoirTempEditField, app.MinReservoirTempUnitDropDown);
+        end
+
+        % Value changed function: MaxReservoirTempUnitDropDown
+        function MaxReservoirTempUnitDropDownValueChanged(app, event)
+            app.updateTemperatureMinLimit(app.MaxReservoirTempEditField, app.MaxReservoirTempUnitDropDown);
         end
     end
 
@@ -3119,6 +3728,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GridSizexEditField
             app.GridSizexEditField = uieditfield(app.GlobalGridSizePanel, 'numeric');
+            app.GridSizexEditField.LowerLimitInclusive = 'off';
             app.GridSizexEditField.Limits = [0 Inf];
             app.GridSizexEditField.RoundFractionalValues = 'on';
             app.GridSizexEditField.ValueChangedFcn = createCallbackFcn(app, @GridSizexEditFieldValueChanged, true);
@@ -3132,6 +3742,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GridSizeyEditField
             app.GridSizeyEditField = uieditfield(app.GlobalGridSizePanel, 'numeric');
+            app.GridSizeyEditField.LowerLimitInclusive = 'off';
             app.GridSizeyEditField.Limits = [0 Inf];
             app.GridSizeyEditField.RoundFractionalValues = 'on';
             app.GridSizeyEditField.ValueChangedFcn = createCallbackFcn(app, @GridSizeyEditFieldValueChanged, true);
@@ -3145,6 +3756,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GridSizezEditField
             app.GridSizezEditField = uieditfield(app.GlobalGridSizePanel, 'numeric');
+            app.GridSizezEditField.LowerLimitInclusive = 'off';
             app.GridSizezEditField.Limits = [0 Inf];
             app.GridSizezEditField.RoundFractionalValues = 'on';
             app.GridSizezEditField.ValueChangedFcn = createCallbackFcn(app, @GridSizezEditFieldValueChanged, true);
@@ -3256,21 +3868,18 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GridLayerPlanePointzEditField
             app.GridLayerPlanePointzEditField = uieditfield(app.GridLayerPropertiesPanel, 'numeric');
-            app.GridLayerPlanePointzEditField.Limits = [0 Inf];
             app.GridLayerPlanePointzEditField.ValueChangedFcn = createCallbackFcn(app, @GridLayerPlanePointzEditFieldValueChanged, true);
             app.GridLayerPlanePointzEditField.Tooltip = {'Arbitrary point within domain used to specify base plane. The coordinates have to be Cartesian cell coordinates relative to the first node at (0,0,0).'};
             app.GridLayerPlanePointzEditField.Position = [110 42 49 22];
 
             % Create GridLayerPlanePointyEditField
             app.GridLayerPlanePointyEditField = uieditfield(app.GridLayerPropertiesPanel, 'numeric');
-            app.GridLayerPlanePointyEditField.Limits = [0 Inf];
             app.GridLayerPlanePointyEditField.ValueChangedFcn = createCallbackFcn(app, @GridLayerPlanePointyEditFieldValueChanged, true);
             app.GridLayerPlanePointyEditField.Tooltip = {'Arbitrary point within domain used to specify base plane. The coordinates have to be Cartesian cell coordinates relative to the first node at (0,0,0).'};
             app.GridLayerPlanePointyEditField.Position = [110 69 49 22];
 
             % Create GridLayerPlanePointxEditField
             app.GridLayerPlanePointxEditField = uieditfield(app.GridLayerPropertiesPanel, 'numeric');
-            app.GridLayerPlanePointxEditField.Limits = [0 Inf];
             app.GridLayerPlanePointxEditField.ValueChangedFcn = createCallbackFcn(app, @GridLayerPlanePointxEditFieldValueChanged, true);
             app.GridLayerPlanePointxEditField.Tooltip = {'Arbitrary point within domain used to specify base plane. The coordinates have to be Cartesian cell coordinates relative to the first node at (0,0,0).'};
             app.GridLayerPlanePointxEditField.Position = [110 96 49 22];
@@ -3302,7 +3911,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GridNxEditField
             app.GridNxEditField = uieditfield(app.GlobalcellsPanel, 'numeric');
-            app.GridNxEditField.Limits = [10 Inf];
+            app.GridNxEditField.Limits = [1 Inf];
             app.GridNxEditField.RoundFractionalValues = 'on';
             app.GridNxEditField.ValueChangedFcn = createCallbackFcn(app, @GridNxEditFieldValueChanged, true);
             app.GridNxEditField.Position = [42 67 49 22];
@@ -3316,7 +3925,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GridNyEditField
             app.GridNyEditField = uieditfield(app.GlobalcellsPanel, 'numeric');
-            app.GridNyEditField.Limits = [10 Inf];
+            app.GridNyEditField.Limits = [1 Inf];
             app.GridNyEditField.RoundFractionalValues = 'on';
             app.GridNyEditField.ValueChangedFcn = createCallbackFcn(app, @GridNyEditFieldValueChanged, true);
             app.GridNyEditField.Position = [42 40 49 22];
@@ -3439,6 +4048,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPorosityEditField
             app.GlobalPorosityEditField = uieditfield(app.GlobalPorosityTab, 'numeric');
+            app.GlobalPorosityEditField.LowerLimitInclusive = 'off';
             app.GlobalPorosityEditField.Limits = [0 1];
             app.GlobalPorosityEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPorosityEditFieldValueChanged, true);
             app.GlobalPorosityEditField.Position = [289 150 57 22];
@@ -3452,6 +4062,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPorosityGaussianMaxEditField
             app.GlobalPorosityGaussianMaxEditField = uieditfield(app.GlobalPorosityTab, 'numeric');
+            app.GlobalPorosityGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.GlobalPorosityGaussianMaxEditField.Limits = [0 1];
             app.GlobalPorosityGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPorosityGaussianMaxEditFieldValueChanged, true);
             app.GlobalPorosityGaussianMaxEditField.Position = [289 81 57 22];
@@ -3465,6 +4076,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPorosityGaussianMinEditField
             app.GlobalPorosityGaussianMinEditField = uieditfield(app.GlobalPorosityTab, 'numeric');
+            app.GlobalPorosityGaussianMinEditField.LowerLimitInclusive = 'off';
             app.GlobalPorosityGaussianMinEditField.Limits = [0 1];
             app.GlobalPorosityGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPorosityGaussianMinEditFieldValueChanged, true);
             app.GlobalPorosityGaussianMinEditField.Position = [289 108 57 22];
@@ -3478,6 +4090,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPorosityGaussianStdEditField
             app.GlobalPorosityGaussianStdEditField = uieditfield(app.GlobalPorosityTab, 'numeric');
+            app.GlobalPorosityGaussianStdEditField.LowerLimitInclusive = 'off';
             app.GlobalPorosityGaussianStdEditField.Limits = [0 Inf];
             app.GlobalPorosityGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPorosityGaussianStdEditFieldValueChanged, true);
             app.GlobalPorosityGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -3521,6 +4134,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPorosityEditField
             app.LayerPorosityEditField = uieditfield(app.LayerPorosityTab, 'numeric');
+            app.LayerPorosityEditField.LowerLimitInclusive = 'off';
             app.LayerPorosityEditField.Limits = [0 1];
             app.LayerPorosityEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPorosityEditFieldValueChanged, true);
             app.LayerPorosityEditField.Position = [289 150 57 22];
@@ -3534,6 +4148,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPorosityGaussianMaxEditField
             app.LayerPorosityGaussianMaxEditField = uieditfield(app.LayerPorosityTab, 'numeric');
+            app.LayerPorosityGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.LayerPorosityGaussianMaxEditField.Limits = [0 1];
             app.LayerPorosityGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPorosityGaussianMaxEditFieldValueChanged, true);
             app.LayerPorosityGaussianMaxEditField.Position = [289 81 57 22];
@@ -3547,6 +4162,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPorosityGaussianMinEditField
             app.LayerPorosityGaussianMinEditField = uieditfield(app.LayerPorosityTab, 'numeric');
+            app.LayerPorosityGaussianMinEditField.LowerLimitInclusive = 'off';
             app.LayerPorosityGaussianMinEditField.Limits = [0 1];
             app.LayerPorosityGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPorosityGaussianMinEditFieldValueChanged, true);
             app.LayerPorosityGaussianMinEditField.Position = [289 108 57 22];
@@ -3560,6 +4176,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPorosityGaussianStdEditField
             app.LayerPorosityGaussianStdEditField = uieditfield(app.LayerPorosityTab, 'numeric');
+            app.LayerPorosityGaussianStdEditField.LowerLimitInclusive = 'off';
             app.LayerPorosityGaussianStdEditField.Limits = [0 Inf];
             app.LayerPorosityGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPorosityGaussianStdEditFieldValueChanged, true);
             app.LayerPorosityGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -3620,6 +4237,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPermEditField
             app.GlobalPermEditField = uieditfield(app.GlobalPermeabilityTab, 'numeric');
+            app.GlobalPermEditField.LowerLimitInclusive = 'off';
             app.GlobalPermEditField.Limits = [0 Inf];
             app.GlobalPermEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPermEditFieldValueChanged, true);
             app.GlobalPermEditField.Position = [252 240 57 22];
@@ -3633,6 +4251,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPermGaussianMinEditField
             app.GlobalPermGaussianMinEditField = uieditfield(app.GlobalPermeabilityTab, 'numeric');
+            app.GlobalPermGaussianMinEditField.LowerLimitInclusive = 'off';
             app.GlobalPermGaussianMinEditField.Limits = [0 Inf];
             app.GlobalPermGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPermGaussianMinEditFieldValueChanged, true);
             app.GlobalPermGaussianMinEditField.Position = [252 206 57 24];
@@ -3646,6 +4265,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPermGaussianMaxEditField
             app.GlobalPermGaussianMaxEditField = uieditfield(app.GlobalPermeabilityTab, 'numeric');
+            app.GlobalPermGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.GlobalPermGaussianMaxEditField.Limits = [0 Inf];
             app.GlobalPermGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPermGaussianMaxEditFieldValueChanged, true);
             app.GlobalPermGaussianMaxEditField.Position = [252 174 57 22];
@@ -3659,6 +4279,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPermGaussianStdEditField
             app.GlobalPermGaussianStdEditField = uieditfield(app.GlobalPermeabilityTab, 'numeric');
+            app.GlobalPermGaussianStdEditField.LowerLimitInclusive = 'off';
             app.GlobalPermGaussianStdEditField.Limits = [0 Inf];
             app.GlobalPermGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPermGaussianStdEditFieldValueChanged, true);
             app.GlobalPermGaussianStdEditField.Position = [529 207 57 22];
@@ -3672,6 +4293,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPermDirxEditField
             app.GlobalPermDirxEditField = uieditfield(app.GlobalPermeabilityTab, 'numeric');
+            app.GlobalPermDirxEditField.LowerLimitInclusive = 'off';
             app.GlobalPermDirxEditField.Limits = [0 Inf];
             app.GlobalPermDirxEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPermDirxEditFieldValueChanged, true);
             app.GlobalPermDirxEditField.Position = [252 113 57 24];
@@ -3685,6 +4307,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPermDirzEditField
             app.GlobalPermDirzEditField = uieditfield(app.GlobalPermeabilityTab, 'numeric');
+            app.GlobalPermDirzEditField.LowerLimitInclusive = 'off';
             app.GlobalPermDirzEditField.Limits = [0 Inf];
             app.GlobalPermDirzEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalPermDirzEditFieldValueChanged, true);
             app.GlobalPermDirzEditField.Position = [252 51 57 22];
@@ -3745,6 +4368,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalPermDiryEditField
             app.GlobalPermDiryEditField = uieditfield(app.GlobalPermeabilityTab, 'numeric');
+            app.GlobalPermDiryEditField.LowerLimitInclusive = 'off';
             app.GlobalPermDiryEditField.Limits = [0 Inf];
             app.GlobalPermDiryEditField.Position = [252 81 57 24];
             app.GlobalPermDiryEditField.Value = 1;
@@ -3786,6 +4410,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPermEditField
             app.LayerPermEditField = uieditfield(app.LayerPermeabilityTab, 'numeric');
+            app.LayerPermEditField.LowerLimitInclusive = 'off';
             app.LayerPermEditField.Limits = [0 Inf];
             app.LayerPermEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPermEditFieldValueChanged, true);
             app.LayerPermEditField.Position = [252 240 57 22];
@@ -3799,6 +4424,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPermGaussianMinEditField
             app.LayerPermGaussianMinEditField = uieditfield(app.LayerPermeabilityTab, 'numeric');
+            app.LayerPermGaussianMinEditField.LowerLimitInclusive = 'off';
             app.LayerPermGaussianMinEditField.Limits = [0 Inf];
             app.LayerPermGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPermGaussianMinEditFieldValueChanged, true);
             app.LayerPermGaussianMinEditField.Position = [252 206 57 24];
@@ -3812,6 +4438,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPermGaussianMaxEditField
             app.LayerPermGaussianMaxEditField = uieditfield(app.LayerPermeabilityTab, 'numeric');
+            app.LayerPermGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.LayerPermGaussianMaxEditField.Limits = [0 Inf];
             app.LayerPermGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPermGaussianMaxEditFieldValueChanged, true);
             app.LayerPermGaussianMaxEditField.Position = [252 174 57 22];
@@ -3825,6 +4452,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPermGaussianStdEditField
             app.LayerPermGaussianStdEditField = uieditfield(app.LayerPermeabilityTab, 'numeric');
+            app.LayerPermGaussianStdEditField.LowerLimitInclusive = 'off';
             app.LayerPermGaussianStdEditField.Limits = [0 Inf];
             app.LayerPermGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPermGaussianStdEditFieldValueChanged, true);
             app.LayerPermGaussianStdEditField.Position = [529 207 57 22];
@@ -3838,6 +4466,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPermDirxEditField
             app.LayerPermDirxEditField = uieditfield(app.LayerPermeabilityTab, 'numeric');
+            app.LayerPermDirxEditField.LowerLimitInclusive = 'off';
             app.LayerPermDirxEditField.Limits = [0 Inf];
             app.LayerPermDirxEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPermDirxEditFieldValueChanged, true);
             app.LayerPermDirxEditField.Position = [252 113 57 24];
@@ -3851,6 +4480,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPermDirzEditField
             app.LayerPermDirzEditField = uieditfield(app.LayerPermeabilityTab, 'numeric');
+            app.LayerPermDirzEditField.LowerLimitInclusive = 'off';
             app.LayerPermDirzEditField.Limits = [0 Inf];
             app.LayerPermDirzEditField.ValueChangedFcn = createCallbackFcn(app, @LayerPermDirzEditFieldValueChanged, true);
             app.LayerPermDirzEditField.Position = [252 51 57 22];
@@ -3911,6 +4541,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerPermDiryEditField
             app.LayerPermDiryEditField = uieditfield(app.LayerPermeabilityTab, 'numeric');
+            app.LayerPermDiryEditField.LowerLimitInclusive = 'off';
             app.LayerPermDiryEditField.Limits = [0 Inf];
             app.LayerPermDiryEditField.Position = [252 81 57 24];
             app.LayerPermDiryEditField.Value = 1;
@@ -3957,6 +4588,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalDensityEditField
             app.GlobalDensityEditField = uieditfield(app.GlobalDensityTab, 'numeric');
+            app.GlobalDensityEditField.LowerLimitInclusive = 'off';
             app.GlobalDensityEditField.Limits = [0 Inf];
             app.GlobalDensityEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalDensityEditFieldValueChanged, true);
             app.GlobalDensityEditField.Position = [289 150 57 22];
@@ -3970,6 +4602,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalDensityGaussianMaxEditField
             app.GlobalDensityGaussianMaxEditField = uieditfield(app.GlobalDensityTab, 'numeric');
+            app.GlobalDensityGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.GlobalDensityGaussianMaxEditField.Limits = [0 Inf];
             app.GlobalDensityGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalDensityGaussianMaxEditFieldValueChanged, true);
             app.GlobalDensityGaussianMaxEditField.Position = [289 81 57 22];
@@ -3983,6 +4616,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalDensityGaussianMinEditField
             app.GlobalDensityGaussianMinEditField = uieditfield(app.GlobalDensityTab, 'numeric');
+            app.GlobalDensityGaussianMinEditField.LowerLimitInclusive = 'off';
             app.GlobalDensityGaussianMinEditField.Limits = [0 Inf];
             app.GlobalDensityGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalDensityGaussianMinEditFieldValueChanged, true);
             app.GlobalDensityGaussianMinEditField.Position = [289 108 57 22];
@@ -3996,6 +4630,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalDensityGaussianStdEditField
             app.GlobalDensityGaussianStdEditField = uieditfield(app.GlobalDensityTab, 'numeric');
+            app.GlobalDensityGaussianStdEditField.LowerLimitInclusive = 'off';
             app.GlobalDensityGaussianStdEditField.Limits = [0 Inf];
             app.GlobalDensityGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalDensityGaussianStdEditFieldValueChanged, true);
             app.GlobalDensityGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -4060,6 +4695,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerDensityEditField
             app.LayerDensityEditField = uieditfield(app.LayerDensityTab, 'numeric');
+            app.LayerDensityEditField.LowerLimitInclusive = 'off';
             app.LayerDensityEditField.Limits = [0 Inf];
             app.LayerDensityEditField.ValueChangedFcn = createCallbackFcn(app, @LayerDensityEditFieldValueChanged, true);
             app.LayerDensityEditField.Position = [289 150 57 22];
@@ -4073,6 +4709,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerDensityGaussianMaxEditField
             app.LayerDensityGaussianMaxEditField = uieditfield(app.LayerDensityTab, 'numeric');
+            app.LayerDensityGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.LayerDensityGaussianMaxEditField.Limits = [0 Inf];
             app.LayerDensityGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @LayerDensityGaussianMaxEditFieldValueChanged, true);
             app.LayerDensityGaussianMaxEditField.Position = [289 81 57 22];
@@ -4086,6 +4723,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerDensityGaussianMinEditField
             app.LayerDensityGaussianMinEditField = uieditfield(app.LayerDensityTab, 'numeric');
+            app.LayerDensityGaussianMinEditField.LowerLimitInclusive = 'off';
             app.LayerDensityGaussianMinEditField.Limits = [0 Inf];
             app.LayerDensityGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @LayerDensityGaussianMinEditFieldValueChanged, true);
             app.LayerDensityGaussianMinEditField.Position = [289 108 57 22];
@@ -4099,6 +4737,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerDensityGaussianStdEditField
             app.LayerDensityGaussianStdEditField = uieditfield(app.LayerDensityTab, 'numeric');
+            app.LayerDensityGaussianStdEditField.LowerLimitInclusive = 'off';
             app.LayerDensityGaussianStdEditField.Limits = [0 Inf];
             app.LayerDensityGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @LayerDensityGaussianStdEditFieldValueChanged, true);
             app.LayerDensityGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -4174,6 +4813,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalCondEditField
             app.GlobalCondEditField = uieditfield(app.GlobalCondTab, 'numeric');
+            app.GlobalCondEditField.LowerLimitInclusive = 'off';
             app.GlobalCondEditField.Limits = [0 Inf];
             app.GlobalCondEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalCondEditFieldValueChanged, true);
             app.GlobalCondEditField.Position = [289 150 57 22];
@@ -4187,6 +4827,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalCondGaussianMaxEditField
             app.GlobalCondGaussianMaxEditField = uieditfield(app.GlobalCondTab, 'numeric');
+            app.GlobalCondGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.GlobalCondGaussianMaxEditField.Limits = [0 Inf];
             app.GlobalCondGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalCondGaussianMaxEditFieldValueChanged, true);
             app.GlobalCondGaussianMaxEditField.Position = [289 81 57 22];
@@ -4200,6 +4841,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalCondGaussianMinEditField
             app.GlobalCondGaussianMinEditField = uieditfield(app.GlobalCondTab, 'numeric');
+            app.GlobalCondGaussianMinEditField.LowerLimitInclusive = 'off';
             app.GlobalCondGaussianMinEditField.Limits = [0 Inf];
             app.GlobalCondGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalCondGaussianMinEditFieldValueChanged, true);
             app.GlobalCondGaussianMinEditField.Position = [289 108 57 22];
@@ -4213,6 +4855,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalCondGaussianStdEditField
             app.GlobalCondGaussianStdEditField = uieditfield(app.GlobalCondTab, 'numeric');
+            app.GlobalCondGaussianStdEditField.LowerLimitInclusive = 'off';
             app.GlobalCondGaussianStdEditField.Limits = [0 Inf];
             app.GlobalCondGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalCondGaussianStdEditFieldValueChanged, true);
             app.GlobalCondGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -4277,6 +4920,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerCondEditField
             app.LayerCondEditField = uieditfield(app.LayerCondTab, 'numeric');
+            app.LayerCondEditField.LowerLimitInclusive = 'off';
             app.LayerCondEditField.Limits = [0 Inf];
             app.LayerCondEditField.ValueChangedFcn = createCallbackFcn(app, @LayerCondEditFieldValueChanged, true);
             app.LayerCondEditField.Position = [289 150 57 22];
@@ -4290,6 +4934,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerCondGaussianMaxEditField
             app.LayerCondGaussianMaxEditField = uieditfield(app.LayerCondTab, 'numeric');
+            app.LayerCondGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.LayerCondGaussianMaxEditField.Limits = [0 Inf];
             app.LayerCondGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @LayerCondGaussianMaxEditFieldValueChanged, true);
             app.LayerCondGaussianMaxEditField.Position = [289 81 57 22];
@@ -4303,6 +4948,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerCondGaussianMinEditField
             app.LayerCondGaussianMinEditField = uieditfield(app.LayerCondTab, 'numeric');
+            app.LayerCondGaussianMinEditField.LowerLimitInclusive = 'off';
             app.LayerCondGaussianMinEditField.Limits = [0 Inf];
             app.LayerCondGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @LayerCondGaussianMinEditFieldValueChanged, true);
             app.LayerCondGaussianMinEditField.Position = [289 108 57 22];
@@ -4316,6 +4962,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerCondGaussianStdEditField
             app.LayerCondGaussianStdEditField = uieditfield(app.LayerCondTab, 'numeric');
+            app.LayerCondGaussianStdEditField.LowerLimitInclusive = 'off';
             app.LayerCondGaussianStdEditField.Limits = [0 Inf];
             app.LayerCondGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @LayerCondGaussianStdEditFieldValueChanged, true);
             app.LayerCondGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -4391,6 +5038,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalHeatEditField
             app.GlobalHeatEditField = uieditfield(app.GlobalHeatTab, 'numeric');
+            app.GlobalHeatEditField.LowerLimitInclusive = 'off';
             app.GlobalHeatEditField.Limits = [0 Inf];
             app.GlobalHeatEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalHeatEditFieldValueChanged, true);
             app.GlobalHeatEditField.Position = [289 150 57 22];
@@ -4404,6 +5052,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalHeatGaussianMaxEditField
             app.GlobalHeatGaussianMaxEditField = uieditfield(app.GlobalHeatTab, 'numeric');
+            app.GlobalHeatGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.GlobalHeatGaussianMaxEditField.Limits = [0 Inf];
             app.GlobalHeatGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalHeatGaussianMaxEditFieldValueChanged, true);
             app.GlobalHeatGaussianMaxEditField.Position = [289 81 57 22];
@@ -4417,6 +5066,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalHeatGaussianMinEditField
             app.GlobalHeatGaussianMinEditField = uieditfield(app.GlobalHeatTab, 'numeric');
+            app.GlobalHeatGaussianMinEditField.LowerLimitInclusive = 'off';
             app.GlobalHeatGaussianMinEditField.Limits = [0 Inf];
             app.GlobalHeatGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalHeatGaussianMinEditFieldValueChanged, true);
             app.GlobalHeatGaussianMinEditField.Position = [289 108 57 22];
@@ -4430,6 +5080,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create GlobalHeatGaussianStdEditField
             app.GlobalHeatGaussianStdEditField = uieditfield(app.GlobalHeatTab, 'numeric');
+            app.GlobalHeatGaussianStdEditField.LowerLimitInclusive = 'off';
             app.GlobalHeatGaussianStdEditField.Limits = [0 Inf];
             app.GlobalHeatGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @GlobalHeatGaussianStdEditFieldValueChanged, true);
             app.GlobalHeatGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -4494,6 +5145,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerHeatEditField
             app.LayerHeatEditField = uieditfield(app.LayerHeatTab, 'numeric');
+            app.LayerHeatEditField.LowerLimitInclusive = 'off';
             app.LayerHeatEditField.Limits = [0 Inf];
             app.LayerHeatEditField.ValueChangedFcn = createCallbackFcn(app, @LayerHeatEditFieldValueChanged, true);
             app.LayerHeatEditField.Position = [289 150 57 22];
@@ -4507,6 +5159,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerHeatGaussianMaxEditField
             app.LayerHeatGaussianMaxEditField = uieditfield(app.LayerHeatTab, 'numeric');
+            app.LayerHeatGaussianMaxEditField.LowerLimitInclusive = 'off';
             app.LayerHeatGaussianMaxEditField.Limits = [0 Inf];
             app.LayerHeatGaussianMaxEditField.ValueChangedFcn = createCallbackFcn(app, @LayerHeatGaussianMaxEditFieldValueChanged, true);
             app.LayerHeatGaussianMaxEditField.Position = [289 81 57 22];
@@ -4520,6 +5173,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerHeatGaussianMinEditField
             app.LayerHeatGaussianMinEditField = uieditfield(app.LayerHeatTab, 'numeric');
+            app.LayerHeatGaussianMinEditField.LowerLimitInclusive = 'off';
             app.LayerHeatGaussianMinEditField.Limits = [0 Inf];
             app.LayerHeatGaussianMinEditField.ValueChangedFcn = createCallbackFcn(app, @LayerHeatGaussianMinEditFieldValueChanged, true);
             app.LayerHeatGaussianMinEditField.Position = [289 108 57 22];
@@ -4533,6 +5187,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create LayerHeatGaussianStdEditField
             app.LayerHeatGaussianStdEditField = uieditfield(app.LayerHeatTab, 'numeric');
+            app.LayerHeatGaussianStdEditField.LowerLimitInclusive = 'off';
             app.LayerHeatGaussianStdEditField.Limits = [0 Inf];
             app.LayerHeatGaussianStdEditField.ValueChangedFcn = createCallbackFcn(app, @LayerHeatGaussianStdEditFieldValueChanged, true);
             app.LayerHeatGaussianStdEditField.Tooltip = {'Standard deviation for Gaussian filter.'};
@@ -4712,6 +5367,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create FluidHeatEditField
             app.FluidHeatEditField = uieditfield(app.ThermalPropertiesPanel, 'numeric');
+            app.FluidHeatEditField.LowerLimitInclusive = 'off';
             app.FluidHeatEditField.Limits = [0 Inf];
             app.FluidHeatEditField.Position = [139 46 53 22];
             app.FluidHeatEditField.Value = 4182;
@@ -4724,6 +5380,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create FluidCondEditField
             app.FluidCondEditField = uieditfield(app.ThermalPropertiesPanel, 'numeric');
+            app.FluidCondEditField.LowerLimitInclusive = 'off';
             app.FluidCondEditField.Limits = [0 Inf];
             app.FluidCondEditField.Position = [139 14 53 22];
             app.FluidCondEditField.Value = 0.598;
@@ -4754,6 +5411,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create FluidDensityEditField
             app.FluidDensityEditField = uieditfield(app.GeneralPropertiesPanel, 'numeric');
+            app.FluidDensityEditField.LowerLimitInclusive = 'off';
             app.FluidDensityEditField.Limits = [0 Inf];
             app.FluidDensityEditField.Position = [118 46 53 22];
             app.FluidDensityEditField.Value = 1000;
@@ -4766,6 +5424,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create FluidViscosityEditField
             app.FluidViscosityEditField = uieditfield(app.GeneralPropertiesPanel, 'numeric');
+            app.FluidViscosityEditField.LowerLimitInclusive = 'off';
             app.FluidViscosityEditField.Limits = [0 Inf];
             app.FluidViscosityEditField.Position = [118 14 53 22];
             app.FluidViscosityEditField.Value = 1;
@@ -5063,23 +5722,27 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create BCzMaxTempEditField
             app.BCzMaxTempEditField = uieditfield(app.BCsTab, 'numeric');
+            app.BCzMaxTempEditField.LowerLimitInclusive = 'off';
             app.BCzMaxTempEditField.Limits = [-273.15 Inf];
             app.BCzMaxTempEditField.Position = [792 50 69 22];
 
             % Create BCzMaxTempUnitDropDown
             app.BCzMaxTempUnitDropDown = uidropdown(app.BCsTab);
             app.BCzMaxTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.BCzMaxTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @BCzMaxTempUnitDropDownValueChanged, true);
             app.BCzMaxTempUnitDropDown.Position = [869 50 73 22];
             app.BCzMaxTempUnitDropDown.Value = '°C';
 
             % Create BCzMinTempEditField
             app.BCzMinTempEditField = uieditfield(app.BCsTab, 'numeric');
+            app.BCzMinTempEditField.LowerLimitInclusive = 'off';
             app.BCzMinTempEditField.Limits = [-273.15 Inf];
             app.BCzMinTempEditField.Position = [792 106 69 22];
 
             % Create BCzMinTempUnitDropDown
             app.BCzMinTempUnitDropDown = uidropdown(app.BCsTab);
             app.BCzMinTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.BCzMinTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @BCzMinTempUnitDropDownValueChanged, true);
             app.BCzMinTempUnitDropDown.Position = [869 106 73 22];
             app.BCzMinTempUnitDropDown.Value = '°C';
 
@@ -5105,23 +5768,27 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create BCyMaxTempEditField
             app.BCyMaxTempEditField = uieditfield(app.BCsTab, 'numeric');
+            app.BCyMaxTempEditField.LowerLimitInclusive = 'off';
             app.BCyMaxTempEditField.Limits = [-273.15 Inf];
             app.BCyMaxTempEditField.Position = [792 162 69 22];
 
             % Create BCyMaxTempUnitDropDown
             app.BCyMaxTempUnitDropDown = uidropdown(app.BCsTab);
             app.BCyMaxTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.BCyMaxTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @BCyMaxTempUnitDropDownValueChanged, true);
             app.BCyMaxTempUnitDropDown.Position = [869 162 73 22];
             app.BCyMaxTempUnitDropDown.Value = '°C';
 
             % Create BCyMinTempEditField
             app.BCyMinTempEditField = uieditfield(app.BCsTab, 'numeric');
+            app.BCyMinTempEditField.LowerLimitInclusive = 'off';
             app.BCyMinTempEditField.Limits = [-273.15 Inf];
             app.BCyMinTempEditField.Position = [792 218 69 22];
 
             % Create BCyMinTempUnitDropDown
             app.BCyMinTempUnitDropDown = uidropdown(app.BCsTab);
             app.BCyMinTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.BCyMinTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @BCyMinTempUnitDropDownValueChanged, true);
             app.BCyMinTempUnitDropDown.Position = [869 218 73 22];
             app.BCyMinTempUnitDropDown.Value = '°C';
 
@@ -5137,12 +5804,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create BCxMaxTempEditField
             app.BCxMaxTempEditField = uieditfield(app.BCsTab, 'numeric');
+            app.BCxMaxTempEditField.LowerLimitInclusive = 'off';
             app.BCxMaxTempEditField.Limits = [-273.15 Inf];
             app.BCxMaxTempEditField.Position = [792 274 69 22];
 
             % Create BCxMaxTempUnitDropDown
             app.BCxMaxTempUnitDropDown = uidropdown(app.BCsTab);
             app.BCxMaxTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.BCxMaxTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @BCxMaxTempUnitDropDownValueChanged, true);
             app.BCxMaxTempUnitDropDown.Position = [869 274 73 22];
             app.BCxMaxTempUnitDropDown.Value = '°C';
 
@@ -5158,12 +5827,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create BCxMinTempEditField
             app.BCxMinTempEditField = uieditfield(app.BCsTab, 'numeric');
+            app.BCxMinTempEditField.LowerLimitInclusive = 'off';
             app.BCxMinTempEditField.Limits = [-273.15 Inf];
             app.BCxMinTempEditField.Position = [792 331 69 22];
 
             % Create BCxMinTempUnitDropDown
             app.BCxMinTempUnitDropDown = uidropdown(app.BCsTab);
             app.BCxMinTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.BCxMinTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @BCxMinTempUnitDropDownValueChanged, true);
             app.BCxMinTempUnitDropDown.Position = [869 331 73 22];
             app.BCxMinTempUnitDropDown.Value = '°C';
 
@@ -5305,6 +5976,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             % Create ReservoirInitTempUnitDropDown
             app.ReservoirInitTempUnitDropDown = uidropdown(app.InitialConditionsPanel);
             app.ReservoirInitTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.ReservoirInitTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @ReservoirInitTempUnitDropDownValueChanged, true);
             app.ReservoirInitTempUnitDropDown.Position = [235 28 73 22];
             app.ReservoirInitTempUnitDropDown.Value = '°C';
 
@@ -5316,6 +5988,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create ReservoirInitPressureEditField
             app.ReservoirInitPressureEditField = uieditfield(app.InitialConditionsPanel, 'numeric');
+            app.ReservoirInitPressureEditField.Limits = [0 Inf];
             app.ReservoirInitPressureEditField.Position = [157 59 71 22];
 
             % Create ReservoirTemperatureEditFieldLabel
@@ -5326,6 +5999,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create ReservoirInitTempEditField
             app.ReservoirInitTempEditField = uieditfield(app.InitialConditionsPanel, 'numeric');
+            app.ReservoirInitTempEditField.LowerLimitInclusive = 'off';
+            app.ReservoirInitTempEditField.Limits = [-273.15 Inf];
             app.ReservoirInitTempEditField.Position = [157 28 71 22];
 
             % Create InitializeWithEquilibriumCheckBox
@@ -5343,6 +6018,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create EqualizationTimeEditField
             app.EqualizationTimeEditField = uieditfield(app.InitialConditionsPanel, 'numeric');
+            app.EqualizationTimeEditField.Limits = [0 Inf];
             app.EqualizationTimeEditField.Position = [497 31 71 22];
 
             % Create EqualizationTimeUnitDropDown
@@ -5382,6 +6058,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create InjWellRadiusEditField
             app.InjWellRadiusEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
+            app.InjWellRadiusEditField.LowerLimitInclusive = 'off';
+            app.InjWellRadiusEditField.Limits = [0 Inf];
             app.InjWellRadiusEditField.Position = [155 226 61 22];
             app.InjWellRadiusEditField.Value = 70;
 
@@ -5411,12 +6089,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create InjWellRateEditField
             app.InjWellRateEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
+            app.InjWellRateEditField.LowerLimitInclusive = 'off';
             app.InjWellRateEditField.Limits = [0 Inf];
             app.InjWellRateEditField.Position = [267 184 61 22];
             app.InjWellRateEditField.Value = 1;
 
             % Create InjWellBHPEditField
             app.InjWellBHPEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
+            app.InjWellBHPEditField.Limits = [0 Inf];
             app.InjWellBHPEditField.Position = [267 156 61 22];
             app.InjWellBHPEditField.Value = 100;
 
@@ -5486,6 +6166,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             % Create InjWellTempUnitDropDown
             app.InjWellTempUnitDropDown = uidropdown(app.WellsInjectorPanel);
             app.InjWellTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.InjWellTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @InjWellTempUnitDropDownValueChanged, true);
             app.InjWellTempUnitDropDown.Position = [226 114 68 22];
             app.InjWellTempUnitDropDown.Value = '°C';
 
@@ -5497,6 +6178,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create InjWellTempEditField
             app.InjWellTempEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
+            app.InjWellTempEditField.LowerLimitInclusive = 'off';
+            app.InjWellTempEditField.Limits = [-273.15 Inf];
             app.InjWellTempEditField.Position = [154 114 61 22];
 
             % Create ControlTypeLabel
@@ -5567,17 +6250,21 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create ProdWellRadiusEditField
             app.ProdWellRadiusEditField = uieditfield(app.WellsProducerPanel, 'numeric');
+            app.ProdWellRadiusEditField.LowerLimitInclusive = 'off';
+            app.ProdWellRadiusEditField.Limits = [0 Inf];
             app.ProdWellRadiusEditField.Position = [155 226 61 22];
             app.ProdWellRadiusEditField.Value = 70;
 
             % Create ProdWellRateEditField
             app.ProdWellRateEditField = uieditfield(app.WellsProducerPanel, 'numeric');
+            app.ProdWellRateEditField.LowerLimitInclusive = 'off';
             app.ProdWellRateEditField.Limits = [0 Inf];
             app.ProdWellRateEditField.Position = [265 183 61 22];
             app.ProdWellRateEditField.Value = 1;
 
             % Create ProdWellBHPEditField
             app.ProdWellBHPEditField = uieditfield(app.WellsProducerPanel, 'numeric');
+            app.ProdWellBHPEditField.Limits = [0 Inf];
             app.ProdWellBHPEditField.Position = [265 155 61 22];
             app.ProdWellBHPEditField.Value = 100;
 
@@ -5658,6 +6345,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             % Create MinReservoirTempUnitDropDown
             app.MinReservoirTempUnitDropDown = uidropdown(app.PlausibilityLimitsPanel);
             app.MinReservoirTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.MinReservoirTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @MinReservoirTempUnitDropDownValueChanged, true);
             app.MinReservoirTempUnitDropDown.Position = [267 75 73 22];
             app.MinReservoirTempUnitDropDown.Value = 'K';
 
@@ -5680,7 +6368,10 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create MinReservoirTempEditField
             app.MinReservoirTempEditField = uieditfield(app.PlausibilityLimitsPanel, 'numeric');
+            app.MinReservoirTempEditField.LowerLimitInclusive = 'off';
+            app.MinReservoirTempEditField.Limits = [0 Inf];
             app.MinReservoirTempEditField.Position = [189 75 71 22];
+            app.MinReservoirTempEditField.Value = 1;
 
             % Create MaxReservoirPressureUnitDropDown
             app.MaxReservoirPressureUnitDropDown = uidropdown(app.PlausibilityLimitsPanel);
@@ -5696,12 +6387,14 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create MaxReservoirPressureEditField
             app.MaxReservoirPressureEditField = uieditfield(app.PlausibilityLimitsPanel, 'numeric');
+            app.MaxReservoirPressureEditField.Limits = [0 Inf];
             app.MaxReservoirPressureEditField.Position = [189 108 71 22];
             app.MaxReservoirPressureEditField.Value = Inf;
 
             % Create MaxReservoirTempUnitDropDown
             app.MaxReservoirTempUnitDropDown = uidropdown(app.PlausibilityLimitsPanel);
             app.MaxReservoirTempUnitDropDown.Items = {'K', '°C', '°F'};
+            app.MaxReservoirTempUnitDropDown.ValueChangedFcn = createCallbackFcn(app, @MaxReservoirTempUnitDropDownValueChanged, true);
             app.MaxReservoirTempUnitDropDown.Position = [267 42 73 22];
             app.MaxReservoirTempUnitDropDown.Value = '°C';
 
@@ -5713,6 +6406,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
 
             % Create MaxReservoirTempEditField
             app.MaxReservoirTempEditField = uieditfield(app.PlausibilityLimitsPanel, 'numeric');
+            app.MaxReservoirTempEditField.LowerLimitInclusive = 'off';
+            app.MaxReservoirTempEditField.Limits = [-273.15 Inf];
             app.MaxReservoirTempEditField.Position = [189 42 71 22];
             app.MaxReservoirTempEditField.Value = Inf;
 
@@ -5725,6 +6420,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
             % Create TimestepTypeButtonGroup
             app.TimestepTypeButtonGroup = uibuttongroup(app.TimestepsPanel);
             app.TimestepTypeButtonGroup.AutoResizeChildren = 'off';
+            app.TimestepTypeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @TimestepTypeButtonGroupSelectionChanged, true);
             app.TimestepTypeButtonGroup.BorderType = 'none';
             app.TimestepTypeButtonGroup.Position = [19 45 139 69];
 

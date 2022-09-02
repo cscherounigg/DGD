@@ -138,7 +138,7 @@ globalVars.DEFAULT_BC_TYPE = cell(1,6);
 globalVars.DEFAULT_BC_TYPE(1:6)          = {'pressure'}; % Options: 'pressure', 'flux'
 globalVars.DEFAULT_BC_PRESSURE(1:6)      = 0*barsa; % Pa
 globalVars.DEFAULT_BC_FLUX(1:6)          = 0; % m³/s
-globalVars.DEFAULT_BC_TEMPERATURE(1:6)   = 0; % K
+globalVars.DEFAULT_BC_TEMPERATURE(1:6)   = 1; % K
 globalVars.DEFAULT_BC_HEAT_FLUX(1:6)     = 0; % W/m²
 
 % Reservoir
@@ -169,7 +169,7 @@ globalVars.DEFAULT_SIMULATION_TIME_RAMPUP_STEPS             = 8;
 globalVars.DEFAULT_SIMULATION_INITIALIZE_WITH_EQUILIBRIUM   = true;
 globalVars.DEFAULT_SIMULATION_EQUILIBRIUM_TIME              = 100*year; % seconds
 globalVars.DEFAULT_SIMULATION_PRESSURE_LIMITS               = [0, 1e6*barsa]; % Pa
-globalVars.DEFAULT_SIMULATION_TEMPERATURE_LIMITS            = [0, 1e6]; % K
+globalVars.DEFAULT_SIMULATION_TEMPERATURE_LIMITS            = [1, 1e6]; % K
 
 end
 
