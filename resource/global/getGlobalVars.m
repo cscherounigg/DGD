@@ -46,40 +46,39 @@ globalVars.DEFAULT_LOG_STORAGE_DATETIME_FORMAT = 'yyyymmddHHMMSS';
 globalVars.DEFAULT_LOG_MESSAGE_DATETIME_FORMAT = "yyyy-mm-dd HH:MM:SS";
 
 % Task
-globalVars.DEFAULT_TASK_NAME = 'Task';
+globalVars.DEFAULT_TASK_NAME = 'DefaultTask';
 globalVars.DEFAULT_TASK_STORAGE_DATETIME_FORMAT = 'yyyymmddHHMMSS';
-globalVars.DEFAULT_TASK_KEEP_STATES_DURING_SIMULATION = false;
 
 % Default Task params
-globalVars.DEFAULT_BUILDER_PREVIEW = false;
+globalVars.DEFAULT_BUILDER_PREVIEW = true;
 
-globalVars.DEFAULT_GRID_GLOBAL_SIZE      = [100 100 10]; % meter
+globalVars.DEFAULT_GRID_GLOBAL_SIZE      = [400 400 10]; % meter
 globalVars.DEFAULT_GRID_GLOBAL_DEPTH     = 0; % meter
 globalVars.DEFAULT_GRID_GLOBAL_DIMS      = [20 20 10];
 globalVars.DEFAULT_GRID_LAYER_ENABLE     = false;
-globalVars.DEFAULT_GRID_LAYER_POINT      = [0 0 0];
+globalVars.DEFAULT_GRID_LAYER_POINT      = [10 10 4.5];
 globalVars.DEFAULT_GRID_LAYER_THICKNESS  = 1;
 globalVars.DEFAULT_GRID_LAYER_ANGLES     = [0 0 0];
 
 globalVars.DEFAULT_ROCK_VISUALIZATION_PROPERTY   = 'porosity'; % Options: 'porosity', 'permeability', 'density', 'thermal_cond', 'heat_capacity'
 globalVars.DEFAULT_ROCK_VISUALIZATION_LAYER_ONLY = false;
 
-globalVars.DEFAULT_ROCK_GLOBAL_POROSITY_TYPE         = 'uniform'; % Options: 'uniform', 'gaussian'
+globalVars.DEFAULT_ROCK_GLOBAL_POROSITY_TYPE         = 'gaussian'; % Options: 'uniform', 'gaussian'
 globalVars.DEFAULT_ROCK_GLOBAL_POROSITY_UNIFORM      = .2;
 globalVars.DEFAULT_ROCK_GLOBAL_POROSITY_GAUSSIAN_MIN = .1;
 globalVars.DEFAULT_ROCK_GLOBAL_POROSITY_GAUSSIAN_MAX = .3;
-globalVars.DEFAULT_ROCK_GLOBAL_POROSITY_GAUSSIAN_STD = 1;
+globalVars.DEFAULT_ROCK_GLOBAL_POROSITY_GAUSSIAN_STD = 10;
 globalVars.DEFAULT_ROCK_LAYER_POROSITY_TYPE          = 'uniform'; % Options: 'uniform', 'gaussian'
 globalVars.DEFAULT_ROCK_LAYER_POROSITY_UNIFORM       = .2;
 globalVars.DEFAULT_ROCK_LAYER_POROSITY_GAUSSIAN_MIN  = .1;
 globalVars.DEFAULT_ROCK_LAYER_POROSITY_GAUSSIAN_MAX  = .3;
 globalVars.DEFAULT_ROCK_LAYER_POROSITY_GAUSSIAN_STD  = 1;
 
-globalVars.DEFAULT_ROCK_GLOBAL_PERM_TYPE                     = 'uniform'; % Options: 'uniform', 'gaussian', 'directional'
-globalVars.DEFAULT_ROCK_GLOBAL_PERM_UNIFORM                  = 1*milli*darcy; % m²
-globalVars.DEFAULT_ROCK_GLOBAL_PERM_GAUSSIAN_MIN             = 10*milli*darcy; % m²
-globalVars.DEFAULT_ROCK_GLOBAL_PERM_GAUSSIAN_MAX             = 20*milli*darcy; % m²
-globalVars.DEFAULT_ROCK_GLOBAL_PERM_GAUSSIAN_STD             = 1;
+globalVars.DEFAULT_ROCK_GLOBAL_PERM_TYPE                     = 'gaussian'; % Options: 'uniform', 'gaussian', 'directional'
+globalVars.DEFAULT_ROCK_GLOBAL_PERM_UNIFORM                  = 10*milli*darcy; % m²
+globalVars.DEFAULT_ROCK_GLOBAL_PERM_GAUSSIAN_MIN             = 100*milli*darcy; % m²
+globalVars.DEFAULT_ROCK_GLOBAL_PERM_GAUSSIAN_MAX             = 800*milli*darcy; % m²
+globalVars.DEFAULT_ROCK_GLOBAL_PERM_GAUSSIAN_STD             = 10;
 globalVars.DEFAULT_ROCK_GLOBAL_PERM_DIRECTIONAL              = [10 10 1]*milli*darcy; % m²
 globalVars.DEFAULT_ROCK_LAYER_PERM_TYPE                      = 'uniform'; % Options: 'uniform', 'gaussian', 'directional'
 globalVars.DEFAULT_ROCK_LAYER_PERM_UNIFORM                   = 1*milli*darcy; % m²
@@ -142,31 +141,31 @@ globalVars.DEFAULT_BC_TEMPERATURE(1:6)   = 1; % K
 globalVars.DEFAULT_BC_HEAT_FLUX(1:6)     = 0; % W/m²
 
 % Reservoir
-globalVars.DEFAULT_RESERVOIR_PRESSURE           = 100*barsa; % Pa
-globalVars.DEFAULT_RESERVOIR_TEMPERATURE        = 293.15; % K
+globalVars.DEFAULT_RESERVOIR_PRESSURE           = 300*barsa; % Pa
+globalVars.DEFAULT_RESERVOIR_TEMPERATURE        = 573.15; % K
 
 % Wells
 globalVars.DEFAULT_WELLS_INJ_NAME                = 'Inj';
-globalVars.DEFAULT_WELLS_INJ_RADIUS              = 70*milli*meter; % m
+globalVars.DEFAULT_WELLS_INJ_RADIUS              = 70.025*milli*meter; % m
 globalVars.DEFAULT_WELLS_INJ_CONTROL_TYPE        = 'rate'; % Options: 'bhp', 'rate'
-globalVars.DEFAULT_WELLS_INJ_CONTROL_RATE        = .1; % m³/s
+globalVars.DEFAULT_WELLS_INJ_CONTROL_RATE        = .02; % m³/s
 globalVars.DEFAULT_WELLS_INJ_CONTROL_PRESSURE    = 120*barsa; % Pa
-globalVars.DEFAULT_WELLS_INJ_TEMPERATURE         = 293.15; % K
-globalVars.DEFAULT_WELLS_INJ_BOTTOM_POINT        = [2 2 10];
-globalVars.DEFAULT_WELLS_INJ_TOP_OF_PERF         = 1;
+globalVars.DEFAULT_WELLS_INJ_TEMPERATURE         = 333.15; % K
+globalVars.DEFAULT_WELLS_INJ_BOTTOM_POINT        = [4 10 10];
+globalVars.DEFAULT_WELLS_INJ_TOP_OF_PERF         = 2;
 
 globalVars.DEFAULT_WELLS_PROD_NAME               = 'Prod';
-globalVars.DEFAULT_WELLS_PROD_RADIUS             = 70*milli*meter; % m
+globalVars.DEFAULT_WELLS_PROD_RADIUS             = 70.025*milli*meter; % m
 globalVars.DEFAULT_WELLS_PROD_CONTROL_TYPE       = 'bhp'; % Options: 'bhp', 'rate'
-globalVars.DEFAULT_WELLS_PROD_CONTROL_RATE       = .1; % m³/s
-globalVars.DEFAULT_WELLS_PROD_CONTROL_PRESSURE   = 70*barsa; % Pa
-globalVars.DEFAULT_WELLS_PROD_BOTTOM_POINT       = [19 19 10];
-globalVars.DEFAULT_WELLS_PROD_TOP_OF_PERF        = 1;
+globalVars.DEFAULT_WELLS_PROD_CONTROL_RATE       = .02; % m³/s
+globalVars.DEFAULT_WELLS_PROD_CONTROL_PRESSURE   = 270*barsa; % Pa
+globalVars.DEFAULT_WELLS_PROD_BOTTOM_POINT       = [17 10 7];
+globalVars.DEFAULT_WELLS_PROD_TOP_OF_PERF        = 3;
 
 % Simulation
-globalVars.DEFAULT_SIMULATION_END_TIME                      = 10*day; % seconds
-globalVars.DEFAULT_SIMULATION_TIMESTEP                      = 5*hour; % seconds
-globalVars.DEFAULT_SIMULATION_TIMESTEP_TYPE                 = 'fixed'; % Options: 'fixed', 'geometric_rampup'
+globalVars.DEFAULT_SIMULATION_END_TIME                      = 5*year; % seconds
+globalVars.DEFAULT_SIMULATION_TIMESTEP                      = 100*day; % seconds
+globalVars.DEFAULT_SIMULATION_TIMESTEP_TYPE                 = 'geometric_rampup'; % Options: 'fixed', 'geometric_rampup'
 globalVars.DEFAULT_SIMULATION_TIME_RAMPUP_STEPS             = 8;
 globalVars.DEFAULT_SIMULATION_INITIALIZE_WITH_EQUILIBRIUM   = true;
 globalVars.DEFAULT_SIMULATION_EQUILIBRIUM_TIME              = 100*year; % seconds
