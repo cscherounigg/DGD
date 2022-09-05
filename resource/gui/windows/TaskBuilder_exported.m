@@ -5,6 +5,8 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         GraphicalTaskBuilderUIFigure    matlab.ui.Figure
         Panel_2                         matlab.ui.container.Panel
         WarningsPanel                   matlab.ui.container.Panel
+        RemovingResultsWarningLamp      matlab.ui.control.Lamp
+        GridsizewarningLabel_9          matlab.ui.control.Label
         OverwritingTaskWarningLamp      matlab.ui.control.Lamp
         GridsizewarningLabel_2          matlab.ui.control.Label
         GridSizeWarningLamp             matlab.ui.control.Lamp
@@ -39,7 +41,7 @@ classdef TaskBuilder_exported < matlab.apps.AppBase
         TaskNameEditField               matlab.ui.control.EditField
         NameEditFieldLabel              matlab.ui.control.Label
         DomainTab                       matlab.ui.container.Tab
-        GlobalcellsPanel                matlab.ui.container.Panel
+        GlobalCellsPanel                matlab.ui.container.Panel
         xLabel_3                        matlab.ui.control.Label
         GridNzEditField                 matlab.ui.control.NumericEditField
         xLabel_2                        matlab.ui.control.Label
@@ -830,6 +832,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         function saveTask(app)            
             app.updateTaskParams();
             storeTask(app.task);
+            app.task.clearData();
         end
 
         
@@ -851,10 +854,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
         % Task Tab
         function updateTaskTabVisibility(app)
-            if strcmp(app.oldTaskName, app.TaskNameEditField.Value)
-                app.TaskKeepExistingCheckBox.Enable = "on";
-            else
+            if isempty(app.oldTaskName) % Task is new
                 app.TaskKeepExistingCheckBox.Enable = "off";
+            else
+                app.TaskKeepExistingCheckBox.Enable = "on";
             end
         end
 
@@ -2009,10 +2012,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             else
                 app.turnLampOff(app.GridSizeWarningLamp)
             end
-            if strcmp(app.oldTaskName, app.TaskNameEditField.Value) && ~app.TaskKeepExistingCheckBox.Value
-                app.turnLampOnWarning(app.OverwritingTaskWarningLamp)
+            if ~isempty(app.oldTaskName) && ~app.TaskKeepExistingCheckBox.Value
+                app.turnLampOnWarning(app.OverwritingTaskWarningLamp);
+                if app.task.storedDataAvailable()
+                    app.turnLampOnWarning(app.RemovingResultsWarningLamp);
+                end
             else
-                app.turnLampOff(app.OverwritingTaskWarningLamp)
+                app.turnLampOff(app.OverwritingTaskWarningLamp);
+                app.turnLampOff(app.RemovingResultsWarningLamp);
             end
         end
 
@@ -3994,14 +4001,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             app.xLabel_17.Position = [248 15 45 22];
             app.xLabel_17.Text = 'Yaw (z)';
 
-            % Create GlobalcellsPanel
-            app.GlobalcellsPanel = uipanel(app.DomainTab);
-            app.GlobalcellsPanel.AutoResizeChildren = 'off';
-            app.GlobalcellsPanel.Title = 'Global cells';
-            app.GlobalcellsPanel.Position = [285 205 100 122];
+            % Create GlobalCellsPanel
+            app.GlobalCellsPanel = uipanel(app.DomainTab);
+            app.GlobalCellsPanel.AutoResizeChildren = 'off';
+            app.GlobalCellsPanel.Title = 'Global Cells';
+            app.GlobalCellsPanel.Position = [285 205 100 122];
 
             % Create GridNxEditField
-            app.GridNxEditField = uieditfield(app.GlobalcellsPanel, 'numeric');
+            app.GridNxEditField = uieditfield(app.GlobalCellsPanel, 'numeric');
             app.GridNxEditField.Limits = [1 Inf];
             app.GridNxEditField.RoundFractionalValues = 'on';
             app.GridNxEditField.ValueChangedFcn = createCallbackFcn(app, @GridNxEditFieldValueChanged, true);
@@ -4009,13 +4016,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             app.GridNxEditField.Value = 10;
 
             % Create xLabel
-            app.xLabel = uilabel(app.GlobalcellsPanel);
+            app.xLabel = uilabel(app.GlobalCellsPanel);
             app.xLabel.HorizontalAlignment = 'center';
             app.xLabel.Position = [18 67 25 22];
             app.xLabel.Text = 'x';
 
             % Create GridNyEditField
-            app.GridNyEditField = uieditfield(app.GlobalcellsPanel, 'numeric');
+            app.GridNyEditField = uieditfield(app.GlobalCellsPanel, 'numeric');
             app.GridNyEditField.Limits = [1 Inf];
             app.GridNyEditField.RoundFractionalValues = 'on';
             app.GridNyEditField.ValueChangedFcn = createCallbackFcn(app, @GridNyEditFieldValueChanged, true);
@@ -4023,13 +4030,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             app.GridNyEditField.Value = 10;
 
             % Create xLabel_2
-            app.xLabel_2 = uilabel(app.GlobalcellsPanel);
+            app.xLabel_2 = uilabel(app.GlobalCellsPanel);
             app.xLabel_2.HorizontalAlignment = 'center';
             app.xLabel_2.Position = [18 40 25 22];
             app.xLabel_2.Text = 'y';
 
             % Create GridNzEditField
-            app.GridNzEditField = uieditfield(app.GlobalcellsPanel, 'numeric');
+            app.GridNzEditField = uieditfield(app.GlobalCellsPanel, 'numeric');
             app.GridNzEditField.Limits = [1 Inf];
             app.GridNzEditField.RoundFractionalValues = 'on';
             app.GridNzEditField.ValueChangedFcn = createCallbackFcn(app, @GridNzEditFieldValueChanged, true);
@@ -4037,7 +4044,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             app.GridNzEditField.Value = 10;
 
             % Create xLabel_3
-            app.xLabel_3 = uilabel(app.GlobalcellsPanel);
+            app.xLabel_3 = uilabel(app.GlobalCellsPanel);
             app.xLabel_3.HorizontalAlignment = 'center';
             app.xLabel_3.Position = [18 13 25 22];
             app.xLabel_3.Text = 'z';
@@ -6219,6 +6226,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             % Create InjWellPointxEditField
             app.InjWellPointxEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
             app.InjWellPointxEditField.Limits = [0 Inf];
+            app.InjWellPointxEditField.RoundFractionalValues = 'on';
             app.InjWellPointxEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellPointxEditFieldValueChanged, true);
             app.InjWellPointxEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
             app.InjWellPointxEditField.Position = [154 77 61 22];
@@ -6234,6 +6242,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             % Create InjWellPointzEditField
             app.InjWellPointzEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
             app.InjWellPointzEditField.Limits = [0 Inf];
+            app.InjWellPointzEditField.RoundFractionalValues = 'on';
             app.InjWellPointzEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellPointzEditFieldValueChanged, true);
             app.InjWellPointzEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
             app.InjWellPointzEditField.Position = [154 23 61 22];
@@ -6249,6 +6258,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             % Create InjWellPointyEditField
             app.InjWellPointyEditField = uieditfield(app.WellsInjectorPanel, 'numeric');
             app.InjWellPointyEditField.Limits = [0 Inf];
+            app.InjWellPointyEditField.RoundFractionalValues = 'on';
             app.InjWellPointyEditField.ValueChangedFcn = createCallbackFcn(app, @InjWellPointyEditFieldValueChanged, true);
             app.InjWellPointyEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
             app.InjWellPointyEditField.Position = [154 50 61 22];
@@ -6389,6 +6399,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             % Create ProdWellPointxEditField
             app.ProdWellPointxEditField = uieditfield(app.WellsProducerPanel, 'numeric');
             app.ProdWellPointxEditField.Limits = [0 Inf];
+            app.ProdWellPointxEditField.RoundFractionalValues = 'on';
             app.ProdWellPointxEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellPointxEditFieldValueChanged, true);
             app.ProdWellPointxEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
             app.ProdWellPointxEditField.Position = [155 114 61 22];
@@ -6404,6 +6415,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             % Create ProdWellPointzEditField
             app.ProdWellPointzEditField = uieditfield(app.WellsProducerPanel, 'numeric');
             app.ProdWellPointzEditField.Limits = [0 Inf];
+            app.ProdWellPointzEditField.RoundFractionalValues = 'on';
             app.ProdWellPointzEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellPointzEditFieldValueChanged, true);
             app.ProdWellPointzEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
             app.ProdWellPointzEditField.Position = [155 60 61 22];
@@ -6419,6 +6431,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             % Create ProdWellPointyEditField
             app.ProdWellPointyEditField = uieditfield(app.WellsProducerPanel, 'numeric');
             app.ProdWellPointyEditField.Limits = [0 Inf];
+            app.ProdWellPointyEditField.RoundFractionalValues = 'on';
             app.ProdWellPointyEditField.ValueChangedFcn = createCallbackFcn(app, @ProdWellPointyEditFieldValueChanged, true);
             app.ProdWellPointyEditField.Tooltip = {'Cartesian cell coordinates of well setting point.'};
             app.ProdWellPointyEditField.Position = [155 87 61 22];
@@ -6727,30 +6740,41 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             app.WarningsPanel = uipanel(app.Panel_2);
             app.WarningsPanel.AutoResizeChildren = 'off';
             app.WarningsPanel.Title = 'Warnings';
-            app.WarningsPanel.Position = [800 185 199 90];
+            app.WarningsPanel.Position = [800 158 199 117];
 
             % Create GridsizewarningLabel
             app.GridsizewarningLabel = uilabel(app.WarningsPanel);
             app.GridsizewarningLabel.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel.Position = [61 29 98 22];
+            app.GridsizewarningLabel.Position = [61 56 98 22];
             app.GridsizewarningLabel.Text = 'Grid size warning';
 
             % Create GridSizeWarningLamp
             app.GridSizeWarningLamp = uilamp(app.WarningsPanel);
             app.GridSizeWarningLamp.Tooltip = {'Depending on the system building previews and simulating models takes a long time for a large amount of grid cells.'};
-            app.GridSizeWarningLamp.Position = [168 33 12 12];
+            app.GridSizeWarningLamp.Position = [168 60 12 12];
             app.GridSizeWarningLamp.Color = [0.8 0.8 0.8];
 
             % Create GridsizewarningLabel_2
             app.GridsizewarningLabel_2 = uilabel(app.WarningsPanel);
             app.GridsizewarningLabel_2.HorizontalAlignment = 'right';
-            app.GridsizewarningLabel_2.Position = [20 9 139 22];
+            app.GridsizewarningLabel_2.Position = [20 36 139 22];
             app.GridsizewarningLabel_2.Text = 'Overwriting Task warning';
 
             % Create OverwritingTaskWarningLamp
             app.OverwritingTaskWarningLamp = uilamp(app.WarningsPanel);
-            app.OverwritingTaskWarningLamp.Position = [168 13 12 12];
+            app.OverwritingTaskWarningLamp.Position = [168 40 12 12];
             app.OverwritingTaskWarningLamp.Color = [0.8 0.8 0.8];
+
+            % Create GridsizewarningLabel_9
+            app.GridsizewarningLabel_9 = uilabel(app.WarningsPanel);
+            app.GridsizewarningLabel_9.HorizontalAlignment = 'right';
+            app.GridsizewarningLabel_9.Position = [17 16 142 22];
+            app.GridsizewarningLabel_9.Text = 'Removing existing results';
+
+            % Create RemovingResultsWarningLamp
+            app.RemovingResultsWarningLamp = uilamp(app.WarningsPanel);
+            app.RemovingResultsWarningLamp.Position = [168 20 12 12];
+            app.RemovingResultsWarningLamp.Color = [0.8 0.8 0.8];
 
             % Show the figure after all components are created
             app.GraphicalTaskBuilderUIFigure.Visible = 'on';

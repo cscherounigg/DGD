@@ -17,19 +17,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %}
 
-function globalConsts = getGlobalConsts()
-%GETGLOBALCONSTS Summary of this function goes here
+function figures = getFiguresByName(name)
+%UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-
-globalConsts.PROGRAM_NAME = 'DeepGeoDoublet';
-globalConsts.VERSION = '1.0.0';
-globalConsts.AUTHOR_FIRSTNAME = 'Christoph';
-globalConsts.AUTHOR_LASTNAME = 'Scherounigg';
-globalConsts.YEAR = '2022';
-
-% Colors
-globalConsts.LAMP_OFF_COLOR = [0.80, 0.80, 0.80]; % Gray
-globalConsts.LAMP_OK_COLOR = [0.00, 1.00, 0.00]; % Green
-globalConsts.LAMP_WARNING_COLOR = [1.00, 0.00, 0.00]; % Red
+figures = findall(0,'type', 'figure', 'Name', name);
 end
 

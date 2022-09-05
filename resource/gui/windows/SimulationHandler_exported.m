@@ -245,6 +245,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             if ishandle(app.timestepsTableFigure)
                 close(app.timestepsTableFigure);
             end
+            if ishandle(getFiguresByName('Slice plane adjustment'))
+                close(getFiguresByName('Slice plane adjustment'));
+            end
+            if ishandle(getFiguresByName('Change patch style'))
+                close(getFiguresByName('Change patch style'));
+            end
         end
     end
     
